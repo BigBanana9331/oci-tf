@@ -1,28 +1,29 @@
-provider "oci" {}
-
 data "oci_core_services" "services" {}
 
 data "oci_identity_availability_domains" "availability_domains" {
-    #Required
-    compartment_id = var.tenancy_ocid
+  #Required
+  compartment_id = var.tenancy_ocid
 }
 
 locals {
-  service_ids = lookup(data.oci_core_services.services.services[var.service_gateway_service_names].id)
+  service_ids = [for service in data.oci_core_services.services.services : service.id]
+  natgw       = oci_core_nat_gateway.nat_gateway.id
+  svcgw       = oci_core_service_gateway.service_gateway.id
+  intgw       = oci_core_internet_gateway.internet_gateway.id
 }
 
 resource "oci_core_vcn" "vcn" {
   #Required
   compartment_id = var.compartment_id
   cidr_blocks    = var.vcn_cidr_blocks
-  display_name   = var.vcn_display_name
+  display_name   = var.vcn_name
 }
 
 resource "oci_core_dhcp_options" "dhcp_options" {
   #Required
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
-  display_name   = var.dhcp_options_display_name
+  display_name   = var.dhcp_options_name
   options {
     type        = var.dhcp_options_type
     server_type = var.dhcp_options_server_type
@@ -34,21 +35,21 @@ resource "oci_core_internet_gateway" "internet_gateway" {
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
   enabled        = var.internet_gateway_enabled
-  display_name   = var.internet_gateway_display_name
+  display_name   = var.internet_gateway_name
 }
 
 resource "oci_core_nat_gateway" "nat_gateway" {
   #Required
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
-  display_name   = var.nat_gateway_display_name
+  display_name   = var.nat_gateway_name
 }
 
 resource "oci_core_service_gateway" "service_gateway" {
   #Required
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
-  display_name   = var.service_gateway_display_name
+  display_name   = var.service_gateway_name
 
   dynamic "services" {
     for_each = local.service_ids
@@ -144,11 +145,11 @@ resource "oci_core_route_table" "route_table" {
   for_each = var.route_tables
   #Required
   display_name   = each.key
-  compartment_id = each.value.compartment_id
-  vcn_id         = each.value.vcn_id
+  compartment_id = var.compartment_id
+  vcn_id         = oci_core_vcn.vcn.id
 
   dynamic "route_rules" {
-    for_each = each.value.route_rules
+    for_each = each.value
     content {
       network_entity_id = each.value.network_entity_id
       description       = each.value.description
@@ -168,13 +169,13 @@ resource "oci_core_subnet" "subnet" {
   for_each = var.subnets
 
   display_name              = each.key
-  compartment_id            = each.value.compartment_id
-  vcn_id                    = each.value.vcn_id
+  compartment_id            = var.compartment_id
+  vcn_id                    = oci_core_vcn.vcn.id
   cidr_block                = each.value.cidr_block
   prohibit_internet_ingress = each.value.prohibit_internet_ingress
   dhcp_options_id           = each.value.dhcp_options_id
-  route_table_id            = each.value.route_table_id
-  security_list_ids         = each.value.security_list_ids
+  route_table_id            = oci_core_route_table.route_table[each.value.route_table_id].id
+  security_list_ids         = [for sl in each.value.security_list_ids : oci_core_security_list.security_list[sl].id]
 }
 
 resource "oci_containerengine_cluster" "cluster" {
@@ -198,15 +199,13 @@ resource "oci_containerengine_cluster" "cluster" {
 }
 
 resource "oci_containerengine_node_pool" "test_node_pool" {
-  # for_each = var.node_pools
+  for_each = var.node_pools
 
   name               = each.key
   cluster_id         = oci_containerengine_cluster.cluster.id
   compartment_id     = var.compartment_id
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
-  
-  node_config_details {}
 
   node_config_details {
     size = each.value.node_pool_size
