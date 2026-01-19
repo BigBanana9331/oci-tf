@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "oci" {
-  region = "	ap-singapore-1"
+  region = "ap-singapore-1"
 }
 
 variable "tenancy_ocid" {}
