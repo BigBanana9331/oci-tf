@@ -430,7 +430,7 @@ variable "subnets" {
 }
 
 variable "nsgs" {
-  type = map(object({
+  type = map(set(object({
     direction        = string
     protocol         = string
     source           = optional(string)
@@ -466,7 +466,310 @@ variable "nsgs" {
         min = optional(number)
       }))
     }))
-  }))
+  })))
+  
   nullable = true
-  default  = null
+  default = {
+    "nsg-bastion" = [
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.0.0/30"
+        description      = "Allow bastion to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 6443
+            max = 6443
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allow bastion to worker nodes communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 22
+            max = 22
+          }
+        }
+      }
+    ]
+    "nsg-loadbalancers" = [
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allow traffic to worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 30000
+            max = 32767
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 12256
+            max = 12256
+          }
+        }
+      }
+    ]
+    "nsg-workernodes" = [
+      {
+        direction        = "EGRESS"
+        protocol         = "all"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allows communication from (or to) worker nodes."
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "SERVICE_CIDR_BLOCK"
+        destination      = "all-sin-services-in-oracle-services-network"
+        description      = "Allow nodes to communicate with OKE."
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.0.0/30"
+        description      = "Kubernetes worker to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 6443
+            max = 6443
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.0.0/30"
+        description      = "Kubernetes worker to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 12250
+            max = 12250
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.0.0/30"
+        description      = "To allow com with Kubelet API"
+        tcp_options = {
+          destination_port_range = {
+            min = 10250
+            max = 10250
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "all"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.1.0/24"
+        description = "Allows communication from (or to) worker nodes."
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/30"
+        description = "Allow Kubernetes API endpoint to communicate with worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 1
+            max = 65535
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "0.0.0.0/0"
+        description = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.2.0/24"
+        description = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 10256
+            max = 10256
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.3.0/24"
+        description = "Allow bastion to worker nodes communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 22
+            max = 22
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "all"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/30"
+        description = "Allow com to kubelet API"
+        tcp_options = {
+          destination_port_range = {
+            min = 10250
+            max = 10250
+          }
+        }
+      }
+    ]
+    "nsg-KubernetesAPIendpoint" = [
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "SERVICE_CIDR_BLOCK"
+        destination      = "all-sin-services-in-oracle-services-network"
+        description      = "Allow Kubernetes control plane to communicate with OKE."
+        tcp_options = {
+          destination_port_range = {
+            min = 443
+            max = 443
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "All traffic to worker nodes (when using flannel for pod networking)."
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Path Discovery."
+        tcp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "To allow communication with Worker node kubelet"
+        tcp_options = {
+          destination_port_range = {
+            min = 10250
+            max = 10250
+          }
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.3.0/24"
+        description      = "Allow bastion host communication with API Server Endpoint"
+        tcp_options = {
+          destination_port_range = {
+            min = 6443
+            max = 6443
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.1.0/24"
+        description = "Kubernetes worker to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 6443
+            max = 6443
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.1.0/24"
+        description = "Kubernetes worker to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 12250
+            max = 12250
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.1.0/24"
+        description = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.3.0/24"
+        description = "Allow bastion to Kubernetes API endpoint communication."
+        tcp_options = {
+          destination_port_range = {
+            min = 6443
+            max = 6443
+          }
+        }
+      }
+    ]
+  }
 }

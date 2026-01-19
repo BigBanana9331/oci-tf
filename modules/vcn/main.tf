@@ -39,7 +39,7 @@ resource "oci_core_service_gateway" "service_gateway" {
   display_name   = var.service_gateway_name
 
   services {
-    service_id = data.oci_core_services.services[var.service_name].id
+    service_id = data.oci_core_services.services.services[0].id
   }
 }
 
@@ -169,50 +169,50 @@ resource "oci_core_subnet" "subnet" {
   # security_list_ids         = [for sl in each.value.security_list_ids : oci_core_security_list.security_list[sl].id]
 }
 
-# resource "oci_core_network_security_group" "network_security_group" {
-#   #Required
-#   for_each       = var.nsgs != null ? var.nsgs.network_security_groups : []
-#   compartment_id = var.compartment_id
-#   vcn_id         = oci_core_vcn.vcn.id
-#   display_name   = each.key
-# }
+resource "oci_core_network_security_group" "network_security_group" {
+  #Required
+  for_each       = var.nsgs != null ? var.nsgs.network_security_groups : []
+  compartment_id = var.compartment_id
+  vcn_id         = oci_core_vcn.vcn.id
+  display_name   = each.key
+}
 
-# resource "oci_core_network_security_group_security_rule" "network_security_group_security_rule" {
-#   for_each                  = var.nsgs != null ? var.nsgs.security_rules : []
-#   network_security_group_id = oci_core_network_security_group.network_security_group[each.key].id
-#   direction                 = each.value.direction
-#   protocol                  = each.value.protocol
-#   source                    = each.value.source
-#   destination               = each.value.destination
-#   destination_type          = each.value.destination_type
-#   source_type               = each.value.source_type
-#   stateless                 = each.value.stateless
-#   description               = each.value.description
+resource "oci_core_network_security_group_security_rule" "network_security_group_security_rule" {
+  for_each                  = var.nsgs != null ? var.nsgs.security_rules : []
+  network_security_group_id = oci_core_network_security_group.network_security_group[each.key].id
+  direction                 = each.value.direction
+  protocol                  = each.value.protocol
+  source                    = each.value.source
+  destination               = each.value.destination
+  destination_type          = each.value.destination_type
+  source_type               = each.value.source_type
+  stateless                 = each.value.stateless
+  description               = each.value.description
 
-#   icmp_options {
-#     type = each.value.icmp_options.type
-#     code = each.value.icmp_options.code
-#   }
+  icmp_options {
+    type = each.value.icmp_options.type
+    code = each.value.icmp_options.code
+  }
 
-#   tcp_options {
-#     destination_port_range {
-#       max = each.value.tcp_options.destination_port_range.max
-#       min = each.value.tcp_options.destination_port_range.min
-#     }
-#     source_port_range {
-#       max = each.value.tcp_options.source_port_range.max
-#       min = each.value.tcp_options.source_port_range.min
-#     }
-#   }
-#   udp_options {
-#     destination_port_range {
-#       max = each.value.udp_options.destination_port_range.max
-#       min = each.value.udp_options.destination_port_range.min
-#     }
-#     source_port_range {
-#       max = each.value.udp_options.source_port_range.max
-#       min = each.value.udp_options.source_port_range.min
-#     }
-#   }
-# }
+  tcp_options {
+    destination_port_range {
+      max = each.value.tcp_options.destination_port_range.max
+      min = each.value.tcp_options.destination_port_range.min
+    }
+    source_port_range {
+      max = each.value.tcp_options.source_port_range.max
+      min = each.value.tcp_options.source_port_range.min
+    }
+  }
+  udp_options {
+    destination_port_range {
+      max = each.value.udp_options.destination_port_range.max
+      min = each.value.udp_options.destination_port_range.min
+    }
+    source_port_range {
+      max = each.value.udp_options.source_port_range.max
+      min = each.value.udp_options.source_port_range.min
+    }
+  }
+}
 
