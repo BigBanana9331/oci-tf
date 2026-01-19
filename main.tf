@@ -30,9 +30,9 @@ output "ads" {
   value = data.oci_identity_availability_domains.availability_domains
 }
 
-# module "vcn" {
-#   source          = "./modules/vcn"
-#   tenancy_ocid    = var.tenancy_ocid
-#   compartment_id  = var.compartment_id
-#   vcn_cidr_blocks = ["10.0.0.0/16"]
-# }
+module "vcn" {
+  source          = "./modules/vcn"
+  tenancy_ocid    = var.tenancy_ocid
+  compartment_id  = var.compartment_id
+  vcn_cidr_blocks = ["10.0.0.0/16"]
+}

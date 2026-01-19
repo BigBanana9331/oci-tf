@@ -141,14 +141,14 @@ variable "security_lists" {
       egress_security_rules = [
         {
           protocol         = "6"
-          destination      = "ci-phx-objectstorage"
+          destination      = "all-sin-services-in-oracle-services-network"
           description      = "Allow Kubernetes control plane to communicate with OKE."
           destination_type = "SERVICE_CIDR_BLOCK"
           stateless        = false
         },
         {
           protocol         = "1"
-          destination      = "ci-phx-objectstorage"
+          destination      = "all-sin-services-in-oracle-services-network"
           description      = "Path Discovery."
           destination_type = "SERVICE_CIDR_BLOCK"
           stateless        = false
@@ -188,7 +188,7 @@ variable "security_lists" {
         },
         {
           protocol         = "6"
-          destination      = "ci-phx-objectstorage"
+          destination      = "all-sin-services-in-oracle-services-network"
           description      = "Allow load balancer to communicate with kube-proxy on worker nodes."
           destination_type = "SERVICE_CIDR_BLOCK"
           stateless        = false
@@ -359,7 +359,7 @@ variable "route_tables" {
       },
       {
         network_entity_id = "svcgw"
-        destination       = "ci-phx-objectstorage"
+        destination       = "all-sin-services-in-oracle-services-network"
         destination_type  = "SERVICE_CIDR_BLOCK"
         description       = "Rule for traffic to OCI services"
       }
@@ -373,7 +373,7 @@ variable "route_tables" {
       },
       {
         network_entity_id = "svcgw"
-        destination       = "ci-phx-objectstorage"
+        destination       = "all-sin-services-in-oracle-services-network"
         destination_type  = "SERVICE_CIDR_BLOCK"
         description       = "Rule for traffic to OCI services"
       }
