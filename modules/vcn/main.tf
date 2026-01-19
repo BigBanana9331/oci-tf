@@ -173,14 +173,14 @@ resource "oci_core_subnet" "subnet" {
 
 resource "oci_core_network_security_group" "network_security_group" {
   #Required
-  for_each       = var.nsgs != null ? var.nsgs.network_security_groups : {}
+  for_each       = var.nsgs != null ? var.nsgs : {}
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = each.key
 }
 
 resource "oci_core_network_security_group_security_rule" "network_security_group_security_rule" {
-  for_each                  = var.nsgs != null ? var.nsgs.security_rules : []
+  for_each                  = var.nsgs.security_rules != null ? var.nsgs.security_rules : []
   network_security_group_id = oci_core_network_security_group.network_security_group[each.key].id
   direction                 = each.value.direction
   protocol                  = each.value.protocol
