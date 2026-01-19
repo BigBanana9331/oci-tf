@@ -44,9 +44,11 @@ resource "oci_core_service_gateway" "service_gateway" {
 }
 
 locals {
-  natgw = oci_core_nat_gateway.nat_gateway.id
-  svcgw = oci_core_service_gateway.service_gateway.id
-  intgw = oci_core_internet_gateway.internet_gateway.id
+  gateways = {
+    natgw = oci_core_nat_gateway.nat_gateway.id
+    svcgw = oci_core_service_gateway.service_gateway.id
+    intgw = oci_core_internet_gateway.internet_gateway.id
+  }
 }
 
 # resource "oci_core_security_list" "security_list" {
@@ -141,7 +143,7 @@ resource "oci_core_route_table" "route_table" {
   dynamic "route_rules" {
     for_each = each.value
     content {
-      network_entity_id = locals[each.value.network_entity_id]
+      network_entity_id = local.gateways[each.value.network_entity_id]
       description       = each.value.description
       destination       = each.value.destination
       destination_type  = each.value.destination_type
@@ -171,7 +173,7 @@ resource "oci_core_subnet" "subnet" {
 
 resource "oci_core_network_security_group" "network_security_group" {
   #Required
-  for_each       = var.nsgs != null ? var.nsgs.network_security_groups : []
+  for_each       = var.nsgs != null ? var.nsgs.network_security_groups : {}
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = each.key
