@@ -143,10 +143,10 @@ resource "oci_core_route_table" "route_table" {
   dynamic "route_rules" {
     for_each = each.value
     content {
-      network_entity_id = local.gateways[each.value.network_entity_id]
-      description       = each.value.description
-      destination       = each.value.destination
-      destination_type  = each.value.destination_type
+      network_entity_id = local.gateways[route_rules.network_entity_id]
+      description       = route_rules.description
+      destination       = route_rules.destination
+      destination_type  = route_rules.destination_type
     }
   }
 
