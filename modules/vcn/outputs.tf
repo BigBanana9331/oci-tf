@@ -2,12 +2,20 @@ output "services" {
   value = data.oci_core_services.services.services
 }
 
-output "availability_domains" {
-  value = data.oci_identity_availability_domains.availability_domains.availability_domains
+output "subnets" {
+  value = local.subnets
 }
 
-output "subnets" {
-  value = { for s in oci_core_subnet.subnets : s.display_name => s.id }
+output "seclist" {
+  value = local.seclists
+}
+
+output "nsgs" {
+  value = local.nsgs
+}
+
+output "route_tables" {
+  value = local.route_tables
 }
 
 output "vcn_id" {

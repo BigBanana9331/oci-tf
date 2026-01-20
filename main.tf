@@ -22,9 +22,21 @@ module "vcn" {
   vcn_cidr_blocks = ["10.0.0.0/16"]
 }
 
-module "oke" {
-  source         = "./modules/oke"
-  compartment_id = var.compartment_id
-  tenancy_ocid   = var.tenancy_ocid
-  depends_on     = [module.vcn]
+output "subnets" {
+  value = module.vcn.subnets
 }
+
+output "seclists" {
+  value = module.vcn.seclist
+}
+
+output "route_tables" {
+  value = module.vcn.route_tables
+}
+
+# module "oke" {
+#   source         = "./modules/oke"
+#   compartment_id = var.compartment_id
+#   tenancy_ocid   = var.tenancy_ocid
+#   depends_on     = [module.vcn]
+# }

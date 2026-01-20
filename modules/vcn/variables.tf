@@ -99,52 +99,80 @@ variable "security_lists" {
       }))
     })))
   }))
-  nullable = true
-  default  = null
+  default = {
+    "default_security_list" = {
+      egress_security_rules = [
+        {
+          protocol         = "6"
+          destination      = "0.0.0.0/0"
+          destination_type = "CIDR_BLOCK"
+          description      = "TCP traffic for ports: 22 SSH Remote Login Protocol"
+          tcp_options = {
+            max = 22
+            min = 22
+          }
+        },
+        {
+          protocol         = "1"
+          destination      = "0.0.0.0/0"
+          destination_type = "CIDR_BLOCK"
+          description      = "ICMP traffic for: 3, 4 Destination Unreachable: Fragmentation Needed and Don't Fragment was Set"
+          icmp_options = {
+            type = 3
+            code = 4
+          }
+        },
+        {
+          protocol         = "1"
+          destination      = "10.0.0.0/16"
+          destination_type = "CIDR_BLOCK"
+          description      = "ICMP traffic for: 3 Destination Unreachable"
+          icmp_options = {
+            type = 3
+          }
+        },
+      ]
+
+      ingress_security_rules = [
+        {
+          protocol    = "all"
+          source      = "0.0.0.0/0"
+          source_type = "CIDR_BLOCK"
+          description = "All traffic for all ports"
+        }
+      ]
+    }
+  }
 }
 
 variable "route_tables" {
   type = map(set(object({
-    network_entity_id = string
-    description       = optional(string)
-    destination       = optional(string)
-    destination_type  = optional(string)
+    network_entity_name = string
+    description         = optional(string)
+    destination         = optional(string)
+    destination_type    = optional(string)
   })))
   default = {
-    "routetable-KubernetesAPIendpoint" = [
+    "routetable-private" = [
       {
-        network_entity_id = "natgw"
-        destination       = "0.0.0.0/0"
-        destination_type  = "CIDR_BLOCK"
-        description       = "Rule for traffic to internet"
+        network_entity_name = "natgw"
+        destination         = "0.0.0.0/0"
+        destination_type    = "CIDR_BLOCK"
+        description         = "Rule for traffic to internet"
       },
       {
-        network_entity_id = "svcgw"
-        destination       = "all-sin-services-in-oracle-services-network"
-        destination_type  = "SERVICE_CIDR_BLOCK"
-        description       = "Rule for traffic to OCI services"
+        network_entity_name = "svcgw"
+        destination         = "all-sin-services-in-oracle-services-network"
+        destination_type    = "SERVICE_CIDR_BLOCK"
+        description         = "Rule for traffic to OCI services"
       }
     ],
-    "routetable-workernodes" = [
+    "routetable-public" = [
       {
-        network_entity_id = "natgw"
-        destination       = "0.0.0.0/0"
-        destination_type  = "CIDR_BLOCK"
-        description       = "Rule for traffic to internet"
-      },
-      {
-        network_entity_id = "svcgw"
-        destination       = "all-sin-services-in-oracle-services-network"
-        destination_type  = "SERVICE_CIDR_BLOCK"
-        description       = "Rule for traffic to OCI services"
-      }
-    ],
-    "routetable-loadbalancers" = [
-      {
-        network_entity_id = "intgw"
-        destination       = "0.0.0.0/0"
-        destination_type  = "CIDR_BLOCK"
-        description       = "Rule for traffic to internet"
+        network_entity_name = "intgw"
+        destination         = "0.0.0.0/0"
+        destination_type    = "CIDR_BLOCK"
+        description         = "Rule for traffic to internet"
       }
     ]
   }
@@ -155,32 +183,32 @@ variable "subnets" {
     cidr_block                = string
     dhcp_options_id           = optional(string)
     prohibit_internet_ingress = optional(bool, false)
-    route_table_id            = optional(string)
-    security_list_ids         = optional(list(string))
+    route_table_name            = optional(string)
+    security_list_names         = optional(list(string))
   }))
   default = {
     "KubernetesAPIendpoint" = {
       cidr_block                = "10.0.0.0/30"
       prohibit_internet_ingress = true
-      route_table_id            = "routetable-KubernetesAPIendpoint"
-      security_list_ids         = ["seclist-KubernetesAPIendpoint"]
+      route_table_name           = "routetable-private"
+      security_list_names         = ["default_security_list"]
     },
     "workernodes" = {
       cidr_block                = "10.0.1.0/24"
       prohibit_internet_ingress = true
-      route_table_id            = "routetable-KubernetesAPIendpoint"
-      security_list_ids         = ["seclist-KubernetesAPIendpoint"]
+      route_table_name            = "routetable-private"
+      security_list_names         = ["default_security_list"]
     },
     "loadbalancers" = {
       cidr_block        = "10.0.2.0/24"
-      route_table_id    = "routetable-KubernetesAPIendpoint"
-      security_list_ids = ["seclist-KubernetesAPIendpoint"]
+      route_table_name    = "routetable-public"
+      security_list_names = ["default_security_list"]
     },
     "bastion" = {
       cidr_block                = "10.0.3.0/24"
       prohibit_internet_ingress = true
-      route_table_id            = "routetable-KubernetesAPIendpoint"
-      security_list_ids         = ["seclist-KubernetesAPIendpoint"]
+      route_table_name            = "routetable-private"
+      security_list_names         = ["default_security_list"]
     }
   }
 }

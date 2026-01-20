@@ -1,7 +1,51 @@
 data "oci_core_services" "services" {}
 
-data "oci_identity_availability_domains" "availability_domains" {
-  compartment_id = var.tenancy_ocid
+locals {
+  nsg_rules = flatten([
+    for nsg, rules in var.nsgs : flatten([
+      for idx, rule in rules :
+      {
+        nsg_name         = nsg
+        direction        = rule.direction
+        protocol         = rule.protocol
+        source           = rule.source
+        destination      = rule.destination
+        destination_type = rule.destination_type
+        source_type      = rule.source_type
+        stateless        = rule.stateless
+        description      = rule.description
+        icmp_options     = rule.icmp_options
+        tcp_options      = rule.tcp_options
+        udp_options      = rule.udp_options
+      }
+    ])
+  ])
+
+  network_entity_ids = {
+    natgw = oci_core_nat_gateway.nat_gateway.id
+    svcgw = oci_core_service_gateway.service_gateway.id
+    intgw = oci_core_internet_gateway.internet_gateway.id
+  }
+
+  seclists = {
+    for sl_name, sl_res in oci_core_security_list.security_lists :
+    sl_name => sl_res.id
+  }
+
+  route_tables = {
+    for rt_name, rt_res in oci_core_route_table.route_tables :
+    rt_name => rt_res.id
+  }
+
+  nsgs = {
+    for nsg_name, nsg_res in oci_core_network_security_group.network_security_groups :
+    nsg_name => nsg_res.id
+  }
+
+  subnets = {
+    for sn_name, sn_res in oci_core_subnet.subnets :
+    sn_name => sn_res.id
+  }
 }
 
 resource "oci_core_vcn" "vcn" {
@@ -43,15 +87,7 @@ resource "oci_core_service_gateway" "service_gateway" {
   }
 }
 
-locals {
-  gateways = {
-    natgw = oci_core_nat_gateway.nat_gateway.id
-    svcgw = oci_core_service_gateway.service_gateway.id
-    intgw = oci_core_internet_gateway.internet_gateway.id
-  }
-}
-
-resource "oci_core_security_list" "security_list" {
+resource "oci_core_security_list" "security_lists" {
   for_each = var.security_lists != null ? var.security_lists : {}
 
   display_name   = each.key
@@ -131,7 +167,7 @@ resource "oci_core_security_list" "security_list" {
   }
 }
 
-resource "oci_core_route_table" "route_table" {
+resource "oci_core_route_table" "route_tables" {
   for_each = var.route_tables != null ? var.route_tables : {}
 
   display_name   = each.key
@@ -141,7 +177,7 @@ resource "oci_core_route_table" "route_table" {
   dynamic "route_rules" {
     for_each = each.value != null ? each.value : []
     content {
-      network_entity_id = local.gateways[route_rules.value.network_entity_id]
+      network_entity_id = local.network_entity_ids[route_rules.value.network_entity_name]
       description       = route_rules.value.description
       destination       = route_rules.value.destination
       destination_type  = route_rules.value.destination_type
@@ -164,11 +200,11 @@ resource "oci_core_subnet" "subnets" {
   cidr_block                = each.value.cidr_block
   prohibit_internet_ingress = each.value.prohibit_internet_ingress
   dhcp_options_id           = each.value.dhcp_options_id
-  route_table_id            = var.route_tables != null ? oci_core_route_table.route_table[each.value.route_table_id].id : null
-  security_list_ids         = var.security_lists != null ? [for sl in each.value.security_list_ids : oci_core_security_list.security_list[sl].id] : []
+  route_table_id            = local.route_tables[each.value.route_table_name]
+  security_list_ids         = [for sl in each.value.security_list_names : local.seclists[sl]]
 }
 
-resource "oci_core_network_security_group" "network_security_group" {
+resource "oci_core_network_security_group" "network_security_groups" {
   #Required
   for_each       = var.nsgs != null ? var.nsgs : {}
   compartment_id = var.compartment_id
@@ -176,33 +212,10 @@ resource "oci_core_network_security_group" "network_security_group" {
   display_name   = each.key
 }
 
-
-locals {
-  nsg_rules = flatten([
-    for nsg, rules in var.nsgs : flatten([
-      for idx, rule in rules :
-      {
-        nsg_name         = nsg
-        direction        = rule.direction
-        protocol         = rule.protocol
-        source           = rule.source
-        destination      = rule.destination
-        destination_type = rule.destination_type
-        source_type      = rule.source_type
-        stateless        = rule.stateless
-        description      = rule.description
-        icmp_options     = rule.icmp_options
-        tcp_options      = rule.tcp_options
-        udp_options      = rule.udp_options
-      }
-    ])
-  ])
-}
-
 resource "oci_core_network_security_group_security_rule" "network_security_group_security_rule" {
   for_each = { for idx, rule in local.nsg_rules : "${rule.nsg_name}-${idx}" => rule }
 
-  network_security_group_id = oci_core_network_security_group.network_security_group[each.value.nsg_name].id
+  network_security_group_id = oci_core_network_security_group.network_security_groups[each.value.nsg_name].id
   direction                 = each.value.direction
   protocol                  = each.value.protocol
   source                    = each.value.source
@@ -259,4 +272,3 @@ resource "oci_core_network_security_group_security_rule" "network_security_group
     }
   }
 }
-
