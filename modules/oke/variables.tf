@@ -30,7 +30,7 @@ variable "kubernetes_version" {
 
 variable "cluster_subnet_name" {
   type    = string
-  default = "controlplane"
+  default = "KubernetesAPIendpoint"
 }
 
 variable "endpoint_nsg_ids" {
