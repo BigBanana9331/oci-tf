@@ -155,7 +155,7 @@ resource "oci_core_route_table" "route_table" {
   ]
 }
 
-resource "oci_core_subnet" "subnet" {
+resource "oci_core_subnet" "subnets" {
   for_each = var.subnets != null ? var.subnets : {}
 
   display_name              = each.key

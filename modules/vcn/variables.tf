@@ -407,7 +407,7 @@ variable "nsgs" {
       },
       {
         direction   = "INGRESS"
-        protocol    = "all"
+        protocol    = "6"
         source_type = "CIDR_BLOCK"
         source      = "10.0.0.0/30"
         description = "Allow com to kubelet API"
@@ -446,7 +446,7 @@ variable "nsgs" {
         destination_type = "CIDR_BLOCK"
         destination      = "10.0.1.0/24"
         description      = "Path Discovery."
-        tcp_options = {
+        icmp_options = {
           type = 3
           code = 4
         }

@@ -7,7 +7,11 @@ variable "vcn_name" {
   default = "acme-dev-vcn"
 }
 
+# variable "vcn_id" {
+#   type = string
+#   nullable = true
 
+# }
 
 variable "cluster_name" {
   type    = string
