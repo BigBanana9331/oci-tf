@@ -467,7 +467,7 @@ variable "nsgs" {
       }))
     }))
   })))
-  
+
   nullable = true
   default = {
     "nsg-bastion" = [
