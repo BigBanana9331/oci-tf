@@ -21,9 +21,9 @@ module "vcn" {
   compartment_id = var.compartment_ocid
 }
 
-# module "oke" {
-#   source         = "./modules/oke"
-#   tenancy_ocid   = var.tenancy_ocid
-#   compartment_id = var.compartment_ocid
-#   depends_on     = [module.vcn]
-# }
+module "oke" {
+  source         = "./modules/oke"
+  tenancy_ocid   = var.tenancy_ocid
+  compartment_id = var.compartment_ocid
+  depends_on     = [module.vcn]
+}
