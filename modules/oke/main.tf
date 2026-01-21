@@ -65,21 +65,24 @@ resource "oci_containerengine_cluster" "cluster" {
       is_pod_security_policy_enabled = var.is_pod_security_policy_enabled
     }
 
-    open_id_connect_token_authentication_config {
-      ca_certificate                  = var.ca_certificate
-      client_id                       = var.client_id
-      configuration_file              = var.configuration_file
-      groups_prefix                   = var.groups_prefix
-      is_open_id_connect_auth_enabled = var.is_open_id_connect_auth_enabled
-      issuer_url                      = var.issuer_url
-      signing_algorithms              = var.signing_algorithms
-      username_claim                  = var.username_claim
-      username_prefix                 = var.username_prefix
-      dynamic "required_claims" {
-        for_each = var.required_claims
-        content {
-          key   = each.key
-          value = each.value
+    dynamic "open_id_connect_token_authentication_config" {
+      for_each = var.is_open_id_connect_auth_enabled != null ? [1] : []
+      content {
+        ca_certificate                  = var.ca_certificate
+        client_id                       = var.client_id
+        configuration_file              = var.configuration_file
+        groups_prefix                   = var.groups_prefix
+        is_open_id_connect_auth_enabled = var.is_open_id_connect_auth_enabled
+        issuer_url                      = var.issuer_url
+        signing_algorithms              = var.signing_algorithms
+        username_claim                  = var.username_claim
+        username_prefix                 = var.username_prefix
+        dynamic "required_claims" {
+          for_each = var.required_claims
+          content {
+            key   = each.key
+            value = each.value
+          }
         }
       }
     }

@@ -93,8 +93,9 @@ variable "groups_prefix" {
 }
 
 variable "is_open_id_connect_auth_enabled" {
-  type    = bool
-  default = false
+  type     = bool
+  nullable = true
+  default  = null
 }
 
 variable "issuer_url" {
@@ -137,10 +138,10 @@ variable "node_pools" {
     is_force_action_after_grace_duration = optional(bool, null)
     is_force_delete_after_grace_duration = optional(bool, null)
     node_nsg_names                       = optional(set(string), [])
-    cycle_modes                          = optional(set(string), [])
-    is_node_cycling_enabled              = optional(bool, null)
-    maximum_surge                        = optional(number, null)
-    maximum_unavailable                  = optional(number, null)
+    cycle_modes                          = optional(set(string), ["INSTANCE_REPLACE"])
+    is_node_cycling_enabled              = optional(bool, false)
+    maximum_surge                        = optional(number, 1)
+    maximum_unavailable                  = optional(number, 1)
     image_id                             = optional(string, "ocid1.image.oc1.ap-singapore-1.aaaaaaaa2a3rqme4763azdnhuj47wft43q5o236g7jbglkfhogprk44o2bta")
     source_type                          = optional(string, "IMAGE")
   }))
