@@ -91,7 +91,7 @@ resource "oci_containerengine_addon" "addon" {
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
   override_existing                = false
-  version                          = "1.4.2"
+  version                          = "v1.4.2"
 
   configurations {
     key   = "compartmentId"
@@ -101,11 +101,6 @@ resource "oci_containerengine_addon" "addon" {
   configurations {
     key   = "loadBalancerSubnetId"
     value = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.loadbalancer_subnet_name][0]
-  }
-
-  configurations {
-    key   = "authType"
-    value = "workloadIdentity"
   }
 }
 
