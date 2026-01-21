@@ -19,6 +19,9 @@ data "oci_core_network_security_groups" "network_security_groups" {
 
 data "oci_containerengine_node_pool_option" "node_pool_option" {
   node_pool_option_id = "all"
+  # node_pool_k8s_version = "v1.34.1"
+  # node_pool_os_arch = ""
+  # node_pool_os_type = ""
 }
 
 data "oci_core_images" "images" {

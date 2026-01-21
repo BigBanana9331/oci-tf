@@ -28,6 +28,6 @@ module "oke" {
   depends_on     = [module.vcn]
 }
 
-output "list_image" {
-  value = module.oke.list_image
+output "node_pool_options" {
+  value = module.oke.node_pool_options
 }
