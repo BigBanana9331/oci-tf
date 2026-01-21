@@ -21,8 +21,8 @@
 2. Add the description (optional)
 3. Choose compartment to manage source provider
 4. Choose Access Type: 
-- Public for Repo accessible for Internet
-- Private for repo hosted privately
+- ***Public** for Repo accessible for Internet*
+- ***Private** for repo hosted privately*
 5. Choose source repo type (GitHub) and provide authen configuration
 
 ![image](./docs/assets/source_provider.png)
@@ -39,8 +39,15 @@
 ### Use created Stack to provision resources
 1. Choose the Stack created above.
 2. Choose the actions to run.
-- Plan: Review the resource changes before apply.
-- Apply: apply the changes to current resource state.
-- Destroy: destroy the resources.
+- **Plan**: Review the resource changes before apply.
+- **Apply**: apply the changes to current resource state.
+- **Destroy**: destroy the resources.
 
 ![image](./docs/assets/run_stack.png)
+
+## OPTIONAL - Create the stack for capture existed resources (Resource Discovery mode) 
+1. Choose create stack from existed compartment
+2. Choose compartment to capture resource.
+3. Set the name for stack
+4. Review and Create stack
+![image](./docs/assets/resource_discovery.png)
