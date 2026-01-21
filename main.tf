@@ -82,3 +82,15 @@ output "nat_gateways" {
 output "service_gateways" {
   value = module.oke.service_gateways
 }
+
+output "compartment_images" {
+  value = module.oke.compartment_images
+}
+
+output "oracle_linux_images" {
+  value = module.oke.oracle_linux_images
+}
+
+output "test" {
+  value = module.oke.test
+}
