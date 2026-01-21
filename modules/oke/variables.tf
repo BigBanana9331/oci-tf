@@ -30,7 +30,7 @@ variable "cluster_subnet_name" {
 variable "endpoint_nsg_names" {
   type     = set(string)
   nullable = true
-  default  = null
+  default  = ["nsg-KubernetesAPIendpoint"]
 }
 
 variable "cni_type" {
