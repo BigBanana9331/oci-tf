@@ -147,7 +147,7 @@ variable "node_pools" {
   }))
   default = {
     "pool-0" = {
-      node_shape               = "VM.Standard.E3.Flex"
+      node_shape               = "VM.Standard.E4.Flex"
       node_shape_ocpus         = 2
       node_shape_memory_in_gbs = 8
       node_pool_size           = 1
