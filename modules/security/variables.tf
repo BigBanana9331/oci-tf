@@ -25,3 +25,11 @@ variable "keys" {
   }))
   default = {}
 }
+
+variable "defined_tags" {
+  type = map(string)
+  default = {
+    "AutoTagging.AppName"   = "Tuntas"
+    "AutoTagging.CreatedBy" = "Terraform"
+  }
+}

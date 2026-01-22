@@ -1,5 +1,13 @@
 variable "compartment_id" {}
 
+variable "defined_tags" {
+  type = map(string)
+  default = {
+    "AutoTagging.AppName"   = "Tuntas"
+    "AutoTagging.CreatedBy" = "Terraform"
+  }
+}
+
 variable "vcn_cidr_blocks" {
   type    = list(string)
   default = ["10.0.0.0/16"]

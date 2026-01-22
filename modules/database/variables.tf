@@ -138,3 +138,11 @@ variable "database_console" {
   default  = null
   nullable = true
 }
+
+variable "defined_tags" {
+  type = map(string)
+  default = {
+    "AutoTagging.AppName"   = "Tuntas"
+    "AutoTagging.CreatedBy" = "Terraform"
+  }
+}

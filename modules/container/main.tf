@@ -41,6 +41,7 @@ resource "oci_containerengine_cluster" "cluster" {
   vcn_id             = data.oci_core_vcns.vcns.virtual_networks[0].id
   type               = var.cluster_type
   kubernetes_version = var.kubernetes_version
+  defined_tags       = var.defined_tags
 
   endpoint_config {
     subnet_id            = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.cluster_subnet_name][0]
@@ -152,7 +153,7 @@ resource "oci_containerengine_node_pool" "node_pool" {
   compartment_id     = var.compartment_id
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
-
+  defined_tags       = var.defined_tags
 
   node_shape_config {
     memory_in_gbs = each.value.node_shape_memory_in_gbs

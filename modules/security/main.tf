@@ -3,6 +3,7 @@ resource "oci_kms_vault" "vault" {
   compartment_id = var.compartment_id
   display_name   = var.vault_name
   vault_type     = var.vault_type
+  defined_tags   = var.defined_tags
 }
 
 resource "oci_kms_key" "keys" {
@@ -12,6 +13,7 @@ resource "oci_kms_key" "keys" {
   display_name             = each.key
   protection_mode          = each.value.protection_mode
   is_auto_rotation_enabled = each.value.is_auto_rotation_enabled
+  defined_tags             = var.defined_tags
 
   key_shape {
     algorithm = each.value.key_shape_algorithm

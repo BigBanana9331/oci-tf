@@ -157,6 +157,15 @@ variable "node_pools" {
   }
 }
 
+variable "defined_tags" {
+  type = map(string)
+  default = {
+    "AutoTagging.AppName"   = "Tuntas"
+    "AutoTagging.CreatedBy" = "Terraform"
+  }
+}
+
+
 # variable "addons" {
 #   type = map(object({
 #     remove_addon_resources_on_delete = optional(bool, true)

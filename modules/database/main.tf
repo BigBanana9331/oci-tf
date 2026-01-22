@@ -42,7 +42,7 @@ resource "oci_vault_secret" "admin_password" {
   secret_name    = var.admin_password.display_name
   description    = var.admin_password.description
   metadata       = var.admin_password.metadata
-
+  defined_tags   = var.defined_tags
   secret_content {
     content      = base64encode(random_password.password.result)
     content_type = var.admin_password.content_type
@@ -68,7 +68,7 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   database_management     = var.database_management
   admin_username          = var.admin_username
   admin_password          = random_password.password.result
-
+  defined_tags            = var.defined_tags
 
 
   dynamic "encrypt_data" {
