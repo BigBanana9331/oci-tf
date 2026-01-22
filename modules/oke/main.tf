@@ -94,17 +94,17 @@ resource "oci_containerengine_addon" "cert_manager_addon" {
   addon_name                       = "CertManager"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  override_existing                = false
-  version                          = "v1.19.1"
+  # override_existing                = false
+  # version                          = "v1.19.1"
 }
 
 resource "oci_containerengine_addon" "metric_server_addon" {
   addon_name                       = "KubernetesMetricsServer"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  override_existing                = false
-  version                          = "v0.8.0"
-  depends_on                       = [oci_containerengine_addon.cert_manager_addon]
+  # override_existing                = false
+  # version                          = "v0.8.0"
+  depends_on = [oci_containerengine_addon.cert_manager_addon]
 }
 
 
@@ -112,8 +112,8 @@ resource "oci_containerengine_addon" "ingress_controller_addon" {
   addon_name                       = "NativeIngressController"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  override_existing                = false
-  version                          = "v1.4.2"
+  # override_existing                = false
+  # version                          = "v1.4.2"
 
   configurations {
     key   = "compartmentId"
