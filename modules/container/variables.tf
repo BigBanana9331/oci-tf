@@ -15,6 +15,16 @@ variable "vcn_name" {
   default = "tf-acme-dev-vcn"
 }
 
+variable "vault_name" {
+  type    = string
+  default = "tf-vault-0"
+}
+
+variable "key_name" {
+  type    = string
+  default = "oke-key"
+}
+
 variable "cluster_name" {
   type    = string
   default = "tf-oke-0"

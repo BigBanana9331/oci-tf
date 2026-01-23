@@ -28,6 +28,16 @@ data "oci_containerengine_node_pool_option" "node_pool_option" {
   node_pool_os_type     = var.node_pool_os_type
 }
 
+data "oci_kms_vaults" "vaults" {
+  compartment_id = var.compartment_id
+}
+
+data "oci_kms_keys" "keys" {
+  compartment_id      = var.compartment_id
+  management_endpoint = [for vault in data.oci_kms_vaults.vaults : vault.management_endpoint if vault.display_name == var.vault_name][0]
+}
+
+
 locals {
   image_id = [
     for source in data.oci_containerengine_node_pool_option.node_pool_option.sources :
@@ -42,6 +52,7 @@ resource "oci_containerengine_cluster" "cluster" {
   vcn_id             = data.oci_core_vcns.vcns.virtual_networks[0].id
   type               = var.cluster_type
   kubernetes_version = var.kubernetes_version
+  kms_key_id         = [for key in data.oci_kms_keys.keys : key.id if key.display_name == var.key_name][0]
   # defined_tags       = var.defined_tags
   freeform_tags = var.freeform_tags
 
@@ -51,6 +62,13 @@ resource "oci_containerengine_cluster" "cluster" {
     nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
     [for nsg_name in var.endpoint_nsg_names : nsg.id if nsg.display_name == nsg_name]])
   }
+
+  # image_policy_config {
+  #   is_policy_enabled = true
+  #   key_details {
+  #     kms_key_id = [for key in data.oci_kms_keys.keys: key.id if key.display_name == var.key_name][0]
+  #   }
+  # }
 
   cluster_pod_network_options {
     cni_type = var.cni_type

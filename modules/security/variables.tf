@@ -23,7 +23,18 @@ variable "keys" {
     time_of_next_rotation     = optional(string)
     time_of_schedule_start    = optional(string)
   }))
-  default = {}
+  default = {
+    "master-key" = {
+      protection_mode     = "SOFTWARE"
+      key_shape_algorithm = "RSA"
+      key_shape_length    = "256"
+    }
+    "oke-key" = {
+      protection_mode     = "SOFTWARE"
+      key_shape_algorithm = "RSA"
+      key_shape_length    = "256"
+    }
+  }
 }
 
 variable "defined_tags" {
