@@ -99,7 +99,7 @@ variable "security_lists" {
     })))
   }))
   default = {
-    "default-security-list" = {
+    "seclist-default" = {
       egress_security_rules = [
         {
           protocol         = "1"
@@ -142,7 +142,7 @@ variable "route_tables" {
     destination_type    = optional(string)
   })))
   default = {
-    "default-routetable" = [
+    "routetable-default" = [
       {
         network_entity_name = "natgw"
         destination         = "0.0.0.0/0"
@@ -161,41 +161,38 @@ variable "route_tables" {
 
 variable "subnets" {
   type = map(object({
-    cidr_block                = string
-    dhcp_options_id           = optional(string)
-    prohibit_internet_ingress = optional(bool, false)
-    route_table_name          = optional(string)
-    security_list_names       = optional(list(string))
+    cidr_block                 = string
+    dhcp_options_name          = optional(string)
+    prohibit_internet_ingress  = optional(bool)
+    prohibit_public_ip_on_vnic = optional(bool, true)
+    route_table_name           = optional(string)
+    security_list_names        = optional(list(string))
   }))
   default = {
     "controlplane" = {
-      cidr_block                = "10.0.0.0/30"
-      prohibit_internet_ingress = true
-      route_table_name          = "default-routetable"
-      security_list_names       = ["default-security-list"]
+      cidr_block          = "10.0.0.0/30"
+      route_table_name    = "routetable-default"
+      security_list_names = ["seclist-default"]
     },
     "workernodes" = {
-      cidr_block                = "10.0.1.0/24"
-      prohibit_internet_ingress = true
-      route_table_name          = "default-routetable"
-      security_list_names       = ["default-security-list"]
+      cidr_block          = "10.0.1.0/24"
+      route_table_name    = "routetable-default"
+      security_list_names = ["seclist-default"]
     },
     "loadbalancers" = {
       cidr_block          = "10.0.2.0/24"
-      route_table_name    = "default-routetable"
-      security_list_names = ["default-security-list"]
+      route_table_name    = "routetable-default"
+      security_list_names = ["seclist-default"]
     },
     "bastion" = {
-      cidr_block                = "10.0.3.0/24"
-      prohibit_internet_ingress = true
-      route_table_name          = "default-routetable"
-      security_list_names       = ["default-security-list"]
+      cidr_block          = "10.0.3.0/24"
+      route_table_name    = "routetable-default"
+      security_list_names = ["seclist-default"]
     },
     "database" = {
-      cidr_block                = "10.0.4.0/24"
-      prohibit_internet_ingress = true
-      route_table_name          = "default-routetable"
-      security_list_names       = ["default-security-list"]
+      cidr_block          = "10.0.4.0/24"
+      route_table_name    = "routetable-default"
+      security_list_names = ["seclist-default"]
     }
   }
 }

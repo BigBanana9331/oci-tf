@@ -195,15 +195,16 @@ resource "oci_core_route_table" "route_tables" {
 resource "oci_core_subnet" "subnets" {
   for_each = var.subnets != null ? var.subnets : {}
 
-  display_name              = each.key
-  compartment_id            = var.compartment_id
-  vcn_id                    = oci_core_vcn.vcn.id
-  cidr_block                = each.value.cidr_block
-  prohibit_internet_ingress = each.value.prohibit_internet_ingress
-  dhcp_options_id           = each.value.dhcp_options_id
-  route_table_id            = local.route_tables[each.value.route_table_name]
-  security_list_ids         = [for sl in each.value.security_list_names : local.seclists[sl]]
-  freeform_tags             = var.freeform_tags
+  display_name               = each.key
+  compartment_id             = var.compartment_id
+  vcn_id                     = oci_core_vcn.vcn.id
+  cidr_block                 = each.value.cidr_block
+  prohibit_internet_ingress  = each.value.prohibit_internet_ingress
+  prohibit_public_ip_on_vnic = each.value.prohibit_public_ip_on_vnic
+  dhcp_options_id            = oci_core_dhcp_options.dhcp_options.id
+  route_table_id             = local.route_tables[each.value.route_table_name]
+  security_list_ids          = [for sl in each.value.security_list_names : local.seclists[sl]]
+  freeform_tags              = var.freeform_tags
   # defined_tags              = var.defined_tags
 }
 
