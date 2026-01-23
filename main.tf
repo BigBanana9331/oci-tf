@@ -15,33 +15,26 @@ variable "tenancy_ocid" {}
 
 variable "compartment_ocid" {}
 
-# module "identity" {
-#   source         = "./modules/identity"
-#   compartment_id = var.compartment_ocid
-# }
+module "identity" {
+  source         = "./modules/identity"
+  compartment_id = var.compartment_ocid
+}
 
-# module "security" {
-#   source         = "./modules/security"
-#   compartment_id = var.compartment_ocid
-#   depends_on     = [module.identity]
-# }
+module "security" {
+  source         = "./modules/security"
+  compartment_id = var.compartment_ocid
+  depends_on     = [module.identity]
+}
 
-# module "networking" {
-#   source         = "./modules/networking"
-#   compartment_id = var.compartment_ocid
-#   depends_on     = [module.identity]
-# }
+module "networking" {
+  source         = "./modules/networking"
+  compartment_id = var.compartment_ocid
+  depends_on     = [module.identity]
+}
 
 module "container" {
   source         = "./modules/container"
   tenancy_ocid   = var.tenancy_ocid
   compartment_id = var.compartment_ocid
-  # depends_on     = [module.networking]
+  depends_on     = [module.networking]
 }
-
-# module "database" {
-#   source         = "./modules/database"
-#   tenancy_ocid   = var.tenancy_ocid
-#   compartment_id = var.compartment_ocid
-#   depends_on     = [module.networking, module.security]
-# }
