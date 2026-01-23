@@ -39,13 +39,13 @@ variable "node_pool_os_type" {
 
 variable "cluster_subnet_name" {
   type    = string
-  default = "KubernetesAPIendpoint"
+  default = "controlplane"
 }
 
 variable "endpoint_nsg_names" {
   type     = set(string)
   nullable = true
-  default  = ["nsg-KubernetesAPIendpoint"]
+  default  = ["nsg-controlplane"]
 }
 
 variable "cni_type" {
@@ -181,22 +181,5 @@ variable "defined_tags" {
 }
 
 
-# variable "addons" {
-#   type = map(object({
-#     remove_addon_resources_on_delete = optional(bool, true)
-#     override_existing                = optional(bool, false)
-#     version                          = string
-#     configurations                   = set(map(string))
-#   }))
-#   nullable = true
-#   default = {
-#     "NativeIngressController" = {
-#       version = "1.4.2"
-#       configurations = [{
-#         compartmentId        = "${var.compartment-id}"
-#         loadBalancerSubnetId = "${[for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.loadbalancer_subnet_name][0]}"
-#       }]
-#     }
-#   }
-# }
+
 

@@ -18,8 +18,8 @@ data "oci_core_network_security_groups" "network_security_groups" {
 }
 
 data "oci_containerengine_node_pool_option" "node_pool_option" {
-  node_pool_option_id   = var.node_pool_option_id
   node_pool_k8s_version = var.kubernetes_version
+  node_pool_option_id   = var.node_pool_option_id
   node_pool_os_arch     = var.node_pool_os_arch
   node_pool_os_type     = var.node_pool_os_type
 }
@@ -91,16 +91,13 @@ resource "oci_containerengine_addon" "cert_manager_addon" {
   addon_name                       = "CertManager"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  # override_existing                = false
-  # version                          = "v1.19.1"
 }
 
 resource "oci_containerengine_addon" "metric_server_addon" {
   addon_name                       = "KubernetesMetricsServer"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  # override_existing                = false
-  # version                          = "v0.8.0"
+
   depends_on = [oci_containerengine_addon.cert_manager_addon]
 }
 
@@ -109,8 +106,6 @@ resource "oci_containerengine_addon" "ingress_controller_addon" {
   addon_name                       = "NativeIngressController"
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
-  # override_existing                = false
-  # version                          = "v1.4.2"
 
   configurations {
     key   = "compartmentId"
@@ -118,28 +113,19 @@ resource "oci_containerengine_addon" "ingress_controller_addon" {
   }
 
   configurations {
+    key   = "authType"
+    value = "workloadIdentity"
+  }
+
+  configurations {
     key   = "loadBalancerSubnetId"
     value = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.loadbalancer_subnet_name][0]
   }
+
   depends_on = [oci_containerengine_addon.cert_manager_addon]
 }
 
-# resource "oci_containerengine_addon" "addon" {
-#   for_each                         = var.addons != null ? var.addons : {}
-#   addon_name                       = each.key
-#   cluster_id                       = oci_containerengine_cluster.cluster.id
-#   remove_addon_resources_on_delete = each.value.remove_addon_resources_on_delete
-#   override_existing                = each.value.override_existing
-#   version                          = each.value.version
 
-#   dynamic "configurations" {
-#     for_each = each.value.configurations
-#     content {
-#       key   = each.key
-#       value = each.value
-#     }
-#   }
-# }
 
 resource "oci_containerengine_node_pool" "node_pool" {
   for_each = var.node_pools
@@ -189,7 +175,26 @@ resource "oci_containerengine_node_pool" "node_pool" {
   }
 
   node_source_details {
-    image_id    = each.value.image_id
+    image_id    = local.image_id
     source_type = each.value.source_type
   }
+}
+
+resource "oci_containerengine_addon" "auto_scaler_addon" {
+  addon_name                       = "ClusterAutoscaler"
+  cluster_id                       = oci_containerengine_cluster.cluster.id
+  remove_addon_resources_on_delete = true
+
+  configurations {
+    key   = "authType"
+    value = "workload"
+  }
+
+  configurations {
+    key = "nodes"
+    # value = "2:4:ocid1.nodepool.oc1.iad.aaaaaaaaae____ydq, 1:5:ocid1.nodepool.oc1.iad.aaaaaaaaah____bzr"
+    value = join(", ", formatlist("2:4:%s", [for nodepool in oci_containerengine_node_pool.node_pool : nodepool.id]))
+  }
+
+  depends_on = [oci_containerengine_node_pool.node_pool]
 }
