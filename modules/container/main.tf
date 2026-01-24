@@ -34,7 +34,7 @@ data "oci_kms_vaults" "vaults" {
 
 data "oci_kms_keys" "keys" {
   compartment_id      = var.compartment_id
-  management_endpoint = [for vault in data.oci_kms_vaults.vaults : vault.management_endpoint if vault.display_name == var.vault_name][0]
+  management_endpoint = [for vault in data.oci_kms_vaults.vaults.vaults : vault.management_endpoint if vault.display_name == var.vault_name][0]
 }
 
 
