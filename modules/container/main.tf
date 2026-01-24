@@ -52,7 +52,7 @@ resource "oci_containerengine_cluster" "cluster" {
   vcn_id             = data.oci_core_vcns.vcns.virtual_networks[0].id
   type               = var.cluster_type
   kubernetes_version = var.kubernetes_version
-  kms_key_id         = [for key in data.oci_kms_keys.keys : key.id if key.display_name == var.key_name][0]
+  kms_key_id         = [for key in data.oci_kms_keys.keys.keys : key.id if key.display_name == var.key_name][0]
   # defined_tags       = var.defined_tags
   freeform_tags = var.freeform_tags
 
