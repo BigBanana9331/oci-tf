@@ -355,7 +355,7 @@ resource "oci_logging_unified_agent_configuration" "unified_agent_configuration"
       source_type = "LOG_TAIL"
       paths       = ["/var/log/containers/*", "/var/log/pods/*"]
       parser {
-        parser_type = "none_parser"
+        parser_type = "NONE"
       }
     }
   }
