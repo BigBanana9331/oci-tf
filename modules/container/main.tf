@@ -145,7 +145,7 @@ resource "oci_logging_log" "logs" {
       source {
         source_type = each.value.source_type
         service     = each.value.service
-        resource    = each.value.resource
+        resource    = oci_containerengine_cluster.cluster.id
         category    = each.value.category
         parameters  = each.value.parameters
       }

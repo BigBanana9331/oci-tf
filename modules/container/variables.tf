@@ -32,8 +32,8 @@ variable "logs" {
       type        = "SERVICE"
       source_type = "OCISERVICE"
       service     = "oke-k8s-cp-prod"
-      resource    = "dev-oke"
-      category    = "all-service-logs"
+      # resource    = "dev-oke"
+      category = "all-service-logs"
     }
     "dev-customlog-oke" = {
       type = "CUSTOM"
