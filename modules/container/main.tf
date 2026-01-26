@@ -130,34 +130,54 @@ resource "oci_containerengine_cluster" "cluster" {
   }
 }
 
-# resource "oci_logging_log" "log" {
-#   log_group_id       = data.oci_logging_log_groups.log_groups.log_groups[0].id
-#   display_name       = var.log.name
-#   log_type           = var.log.type
-#   is_enabled         = var.log.is_enabled
-#   retention_duration = var.log.retention_duration
+resource "oci_logging_log" "logs" {
+  for_each           = var.logs
+  log_group_id       = data.oci_logging_log_groups.log_groups.log_groups[0].id
+  display_name       = each.key
+  log_type           = each.value.type
+  is_enabled         = each.value.is_enabled
+  retention_duration = each.value.retention_duration
 
-#   configuration {
-#     compartment_id = var.compartment_id
-#     source {
-#       source_type = var.log.source_type
-#       service     = var.log.service
-#       resource    = var.log.resource
-#       category    = var.log.category
-#     }
-#   }
+  dynamic "configuration" {
+    for_each = each.value.type != "CUSTOM" ? [1] : []
+    content {
+      compartment_id = var.compartment_id
+      source {
+        source_type = each.value.source_type
+        service     = each.value.service
+        resource    = each.value.resource
+        category    = each.value.category
+        parameters  = each.value.parameters
+      }
+    }
+  }
 
-#   # tags
-#   defined_tags  = var.tags.definedTags
-#   freeform_tags = var.tags.freeformTags
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
 
-#   lifecycle {
-#     ignore_changes = [defined_tags, freeform_tags]
-#   }
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
 
-#   depends_on = [oci_containerengine_cluster.cluster]
-# }
+  depends_on = [oci_containerengine_cluster.cluster]
+}
 
+
+resource "oci_identity_dynamic_group" "dynamic_group" {
+  compartment_id = var.tenancy_ocid
+  description    = "Dynamic group for nodepool instances"
+  matching_rule  = "ANY {instance.compartment.id = '${var.compartment_id}'}"
+  name           = "dev-nodes-dg"
+
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
+}
 
 resource "oci_identity_policy" "policy" {
   #Required
@@ -187,7 +207,8 @@ resource "oci_identity_policy" "policy" {
     "Allow any-user to use subnets in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
     "Allow any-user to read virtual-network-family in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
     "Allow any-user to use vnics in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to inspect compartments in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}"
+    "Allow any-user to inspect compartments in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+    "Allow dynamic-group dev-nodes-dg to use log-content in tenancy" # managed nodes log
   ]
 
   # tags
@@ -298,8 +319,6 @@ resource "oci_containerengine_node_pool" "node_pool" {
   }
 }
 
-
-
 # resource "oci_containerengine_addon" "auto_scaler_addon" {
 #   addon_name                       = "ClusterAutoscaler"
 #   cluster_id                       = oci_containerengine_cluster.cluster.id
@@ -318,3 +337,36 @@ resource "oci_containerengine_node_pool" "node_pool" {
 
 #   depends_on = [oci_containerengine_node_pool.node_pool]
 # }
+
+resource "oci_logging_unified_agent_configuration" "unified_agent_configuration" {
+  compartment_id = var.compartment_id
+  description    = "Custom log confguration"
+  display_name   = "dev-nodes-uac"
+  is_enabled     = true
+
+  service_configuration {
+    configuration_type = "LOGGING"
+
+    destination {
+      log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == "dev-customlog-oke"][0]
+    }
+
+    sources {
+      name        = "worker-logtail"
+      source_type = "LOG_TAIL"
+      paths       = ["/var/log/containers/*", "/var/log/pods/*"]
+    }
+  }
+
+  group_association {
+    group_list = [oci_identity_dynamic_group.dynamic_group.id]
+  }
+
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
+}

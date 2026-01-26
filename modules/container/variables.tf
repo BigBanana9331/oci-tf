@@ -16,19 +16,28 @@ variable "log_group_name" {
   default = "dev-loggroup"
 }
 
-variable "log" {
-  type = object({
-    name               = string
+variable "logs" {
+  type = map(object({
     is_enabled         = optional(bool, true)
-    retention_duration = optional(number, 180)
-    type               = optional(string, "SERVICE")
-    source_type        = optional(string, "OCISERVICE")
-    service            = optional(string, "containerengine")
-    resource           = optional(string, "dev-oke")
-    category           = optional(string, "all")
-  })
+    retention_duration = optional(number, 30)
+    type               = optional(string, "CUSTOM")
+    source_type        = optional(string)
+    service            = optional(string)
+    resource           = optional(string)
+    category           = optional(string)
+    parameters         = optional(map(string))
+  }))
   default = {
-    name = "dev-log-oke"
+    "dev-servicelog-oke" = {
+      type        = "SERVICE"
+      source_type = "OCISERVICE"
+      service     = "oke-k8s-cp-prod"
+      resource    = "dev-oke"
+      category    = "all-service-logs"
+    }
+    "dev-customlog-oke" = {
+      type = "CUSTOM"
+    }
   }
 }
 
