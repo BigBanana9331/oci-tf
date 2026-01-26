@@ -208,7 +208,7 @@ resource "oci_identity_policy" "policy" {
     "Allow any-user to read virtual-network-family in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
     "Allow any-user to use vnics in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
     "Allow any-user to inspect compartments in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow dynamic-group dev-nodes-dg to use log-content in tenancy" # managed nodes log
+    "Allow dynamic-group dev-nodes-dg to use log-content in compartment ${data.oci_identity_compartment.compartment.name}" # managed nodes log
   ]
 
   # tags

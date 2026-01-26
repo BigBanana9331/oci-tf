@@ -28,13 +28,13 @@ variable "logs" {
     parameters         = optional(map(string))
   }))
   default = {
-    "dev-servicelog-oke" = {
-      type        = "SERVICE"
-      source_type = "OCISERVICE"
-      service     = "oke-k8s-cp-prod"
-      resource    = "dev-oke"
-      category    = "all-service-logs"
-    }
+    # "dev-servicelog-oke" = {
+    #   type        = "SERVICE"
+    #   source_type = "OCISERVICE"
+    #   service     = "oke-k8s-cp-prod"
+    #   resource    = "dev-oke"
+    #   category    = "all-service-logs"
+    # }
     "dev-customlog-oke" = {
       type = "CUSTOM"
     }
