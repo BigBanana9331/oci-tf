@@ -346,7 +346,6 @@ resource "oci_logging_unified_agent_configuration" "unified_agent_configuration"
 
   service_configuration {
     configuration_type = "LOGGING"
-
     destination {
       log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == "dev-customlog-oke"][0]
     }
@@ -355,6 +354,9 @@ resource "oci_logging_unified_agent_configuration" "unified_agent_configuration"
       name        = "worker-logtail"
       source_type = "LOG_TAIL"
       paths       = ["/var/log/containers/*", "/var/log/pods/*"]
+      parser {
+        parser_type = "none_parser"
+      }
     }
   }
 
