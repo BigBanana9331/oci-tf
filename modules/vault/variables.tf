@@ -31,11 +31,6 @@ variable "keys" {
       key_shape_algorithm = "AES"
       key_shape_length    = "32"
     }
-    "signing-key" = {
-      protection_mode     = "SOFTWARE"
-      key_shape_algorithm = "ECDSA"
-      key_shape_length    = "32"
-    }
   }
 }
 
