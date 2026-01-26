@@ -82,5 +82,5 @@ module "database" {
   source         = "./modules/database"
   tenancy_ocid   = var.tenancy_ocid
   compartment_id = var.compartment_ocid
-  depends_on     = [module.networking]
+  depends_on     = [module.networking, module.vault]
 }
