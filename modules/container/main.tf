@@ -130,33 +130,33 @@ resource "oci_containerengine_cluster" "cluster" {
   }
 }
 
-resource "oci_logging_log" "log" {
-  log_group_id       = data.oci_logging_log_groups.log_groups.log_groups[0].id
-  display_name       = var.log.name
-  log_type           = var.log.type
-  is_enabled         = var.log.is_enabled
-  retention_duration = var.log.retention_duration
+# resource "oci_logging_log" "log" {
+#   log_group_id       = data.oci_logging_log_groups.log_groups.log_groups[0].id
+#   display_name       = var.log.name
+#   log_type           = var.log.type
+#   is_enabled         = var.log.is_enabled
+#   retention_duration = var.log.retention_duration
 
-  configuration {
-    compartment_id = var.compartment_id
-    source {
-      source_type = var.log.source_type
-      service     = var.log.service
-      resource    = var.log.resource
-      category    = var.log.category
-    }
-  }
+#   configuration {
+#     compartment_id = var.compartment_id
+#     source {
+#       source_type = var.log.source_type
+#       service     = var.log.service
+#       resource    = var.log.resource
+#       category    = var.log.category
+#     }
+#   }
 
-  # tags
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
+#   # tags
+#   defined_tags  = var.tags.definedTags
+#   freeform_tags = var.tags.freeformTags
 
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
+#   lifecycle {
+#     ignore_changes = [defined_tags, freeform_tags]
+#   }
 
-  depends_on = [oci_containerengine_cluster.cluster]
-}
+#   depends_on = [oci_containerengine_cluster.cluster]
+# }
 
 
 resource "oci_identity_policy" "policy" {

@@ -28,7 +28,7 @@ variable "nsg_names" {
 
 variable "shape_name" {
   type    = string
-  default = "MySQL.2"
+  default = "VM.Standard.E5.Flex"
 }
 
 variable "mysql_version" {
@@ -86,7 +86,7 @@ variable "key_name" {
 
 variable "display_name" {
   type    = string
-  default = "HeatWave-DBSystem"
+  default = "dev-mysql"
 }
 
 variable "description" {
