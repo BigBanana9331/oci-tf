@@ -11,6 +11,27 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
+variable "log_group_name" {
+  type    = string
+  default = "dev-loggroup"
+}
+
+variable "log" {
+  type = object({
+    name               = string
+    is_enabled         = optional(bool, true)
+    retention_duration = optional(number, 180)
+    type               = optional(string, "SERVICE")
+    source_type        = optional(string, "OCISERVICE")
+    service            = optional(string, "containerengine")
+    resource           = optional(string, "dev-oke")
+    category           = optional(string, "all")
+  })
+  default = {
+    name = "dev-log-oke"
+  }
+}
+
 variable "vcn_name" {
   type    = string
   default = "dev-vcn"

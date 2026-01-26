@@ -28,6 +28,12 @@ module "tag" {
   compartment_id = var.compartment_ocid
 }
 
+module "loggroup" {
+  source         = "./modules/logging"
+  compartment_id = var.compartment_ocid
+  depends_on     = [module.tag]
+}
+
 module "vault" {
   source         = "./modules/vault"
   compartment_id = var.compartment_ocid
@@ -52,6 +58,7 @@ module "bucket" {
   depends_on     = [module.vault]
 }
 
+# Limited due to trial
 # module "file" {
 #   source         = "./modules/filestorage"
 #   tenancy_ocid   = var.tenancy_ocid
@@ -75,7 +82,7 @@ module "container" {
   source         = "./modules/container"
   tenancy_ocid   = var.tenancy_ocid
   compartment_id = var.compartment_ocid
-  depends_on     = [module.networking]
+  depends_on     = [module.networking, module.loggroup]
 }
 
 module "database" {
