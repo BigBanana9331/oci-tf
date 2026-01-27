@@ -56,9 +56,9 @@ resource "oci_identity_policy" "policy" {
   #Required
   compartment_id = var.compartment_id
   description    = "policy created by terraform"
-  name           = "oke-policy"
+  name           = "${var.vault_name}-policy"
 
-  statements = [for key in oci_kms_key.master_keys : "Allow service blockstorage, objectstorage-${var.region}, oke, streaming to use keys in compartment ${data.oci_identity_compartment.compartment.name} where target.key.id = '${key.id}'"]
+  statements = [for key in oci_kms_key.master_keys : "Allow service blockstorage, objectstorage-${var.region}, oke, queue to use keys in compartment ${data.oci_identity_compartment.compartment.name} where target.key.id = '${key.id}'"]
 
   # tags
   defined_tags  = var.tags.definedTags

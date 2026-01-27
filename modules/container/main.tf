@@ -65,13 +65,6 @@ resource "oci_containerengine_cluster" "cluster" {
     [for nsg_name in var.endpoint_nsg_names : nsg.id if nsg.display_name == nsg_name]])
   }
 
-  # image_policy_config {
-  #   is_policy_enabled = true
-  #   key_details {
-  #     kms_key_id = [for key in data.oci_kms_keys.keys: key.id if key.display_name == var.key_name][0]
-  #   }
-  # }
-
   cluster_pod_network_options {
     cni_type = var.cni_type
   }
@@ -152,7 +145,6 @@ resource "oci_logging_log" "logs" {
 
   depends_on = [oci_containerengine_cluster.cluster]
 }
-
 
 resource "oci_identity_dynamic_group" "dynamic_group" {
   compartment_id = var.tenancy_ocid
@@ -249,6 +241,13 @@ resource "oci_containerengine_node_pool" "node_pool" {
   compartment_id     = var.compartment_id
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
+  ssh_public_key = ""
+  node_metadata = ""
+  
+  initial_node_labels {
+    key = ""
+    value = ""
+  }
 
   node_shape_config {
     memory_in_gbs = each.value.node_shape_memory_in_gbs
@@ -277,6 +276,9 @@ resource "oci_containerengine_node_pool" "node_pool" {
     nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
     [for nsg_name in each.value.node_nsg_names : nsg.id if nsg.display_name == nsg_name]])
 
+    is_pv_encryption_in_transit_enabled = ""
+    kms_key_id = ""
+
     placement_configs {
       subnet_id           = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.worker_subnet_name][0]
       availability_domain = data.oci_identity_availability_domains.availability_domains.availability_domains[0].name
@@ -285,11 +287,54 @@ resource "oci_containerengine_node_pool" "node_pool" {
     node_pool_pod_network_option_details {
       cni_type = each.value.cni_type
     }
+
+    defined_tags  = var.tags.definedTags
+    freeform_tags = var.tags.freeformTags
   }
 
   node_source_details {
     image_id    = local.image_id
     source_type = each.value.source_type
+  }
+
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [
+      defined_tags, 
+      freeform_tags,
+      node_config_details.defined_tags, 
+      node_config_details.freeform_tags,
+    ]
+  }
+}
+
+resource "oci_logging_unified_agent_configuration" "unified_agent_configuration" {
+  compartment_id = var.compartment_id
+  description    = "Custom log confguration"
+  display_name   = "dev-nodes-uac"
+  is_enabled     = true
+
+  service_configuration {
+    configuration_type = "LOGGING"
+    destination {
+      log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == "dev-customlog-oke"][0]
+    }
+
+    sources {
+      name        = "worker-logtail"
+      source_type = "LOG_TAIL"
+      paths       = ["/var/log/containers/*", "/var/log/pods/*"]
+      parser {
+        parser_type = "NONE"
+      }
+    }
+  }
+
+  group_association {
+    group_list = [oci_identity_dynamic_group.dynamic_group.id]
   }
 
   # tags
@@ -327,38 +372,3 @@ resource "oci_containerengine_node_pool" "node_pool" {
 
 #   depends_on = [oci_containerengine_node_pool.node_pool]
 # }
-
-resource "oci_logging_unified_agent_configuration" "unified_agent_configuration" {
-  compartment_id = var.compartment_id
-  description    = "Custom log confguration"
-  display_name   = "dev-nodes-uac"
-  is_enabled     = true
-
-  service_configuration {
-    configuration_type = "LOGGING"
-    destination {
-      log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == "dev-customlog-oke"][0]
-    }
-
-    sources {
-      name        = "worker-logtail"
-      source_type = "LOG_TAIL"
-      paths       = ["/var/log/containers/*", "/var/log/pods/*"]
-      parser {
-        parser_type = "NONE"
-      }
-    }
-  }
-
-  group_association {
-    group_list = [oci_identity_dynamic_group.dynamic_group.id]
-  }
-
-  # tags
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
-
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-}

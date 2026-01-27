@@ -2,6 +2,10 @@ data "oci_identity_availability_domains" "availability_domains" {
   compartment_id = var.tenancy_ocid
 }
 
+data "oci_identity_compartment" "compartment" {
+  id = var.compartment_id
+}
+
 data "oci_core_vcns" "vcns" {
   compartment_id = var.compartment_id
   display_name   = var.vcn_name
@@ -40,6 +44,37 @@ data "oci_secrets_secretbundle" "secretbundle" {
 output "secretbundle" {
   value = data.oci_secrets_secretbundle.secretbundle
 }
+
+resource "oci_identity_policy" "policy" {
+  #Required
+  compartment_id = var.compartment_id
+  description    = "policy created by terraform"
+  name           = "${var.display_name}-policy"
+
+  statements = [
+    "Allow any-user to use key-delegate in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+    "Endorse any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in any-tenancy where request.principal.type = 'mysqldbsystem'",
+    "Endorse any-user to associate keys in tenancy with volumes in any-tenancy where request.principal.type = 'mysqldbsystem'",
+    "Endorse any-user to associate keys in tenancy with volume-backups in any-tenancy where request.principal.type = 'mysqldbsystem'",
+    "Endorse any-user to associate keys in tenancy with buckets in any-tenancy where request.principal.type = 'mysqldbsystem'",
+    "Allow any-user to {NETWORK_SECURITY_GROUP_UPDATE_MEMBERS} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+    "Allow any-user to {VNIC_CREATE, VNIC_UPDATE, VNIC_ASSOCIATE_NETWORK_SECURITY_GROUP, VNIC_DISASSOCIATE_NETWORK_SECURITY_GROUP} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+    "Allow any-user to {SECURITY_ATTRIBUTE_NAMESPACE_USE, VNIC_UPDATE, VNIC_CREATE} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+    "Allow any-user to read leaf-certificate-family in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}"
+  ]
+
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
+
+  depends_on = [oci_kms_key.master_keys]
+}
+
+
 
 resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   compartment_id      = var.compartment_id
