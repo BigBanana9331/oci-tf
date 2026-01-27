@@ -252,11 +252,11 @@ resource "oci_containerengine_node_pool" "node_pool" {
   compartment_id     = var.compartment_id
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
-  ssh_public_key     = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)["publicKey"]
+  ssh_public_key     = jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"]
   node_metadata      = each.value.node_metadata
 
   dynamic "initial_node_labels" {
-    for_each = each.value.initial_node_labels != null ? each.value.initial_node_labels : []
+    for_each = each.value.initial_node_labels != null ? each.value.initial_node_labels : {}
     content {
       key   = initial_node_labels.key
       value = initial_node_labels.value
@@ -319,8 +319,8 @@ resource "oci_containerengine_node_pool" "node_pool" {
     ignore_changes = [
       defined_tags,
       freeform_tags,
-      node_config_details.defined_tags,
-      node_config_details.freeform_tags,
+      node_config_details[0].defined_tags,
+      node_config_details[0].freeform_tags,
     ]
   }
 }
