@@ -53,7 +53,7 @@ variable "master_keys" {
     "signing-key" = {
       protection_mode = "SOFTWARE"
       algorithm       = "RSA"
-      length          = 2048
+      length          = 256
     }
   }
 }
