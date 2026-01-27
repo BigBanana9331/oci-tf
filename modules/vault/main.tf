@@ -50,7 +50,7 @@ resource "oci_kms_key" "keys" {
 resource "oci_vault_secret" "secrets" {
   for_each       = var.secrets
   compartment_id = var.compartment_id
-  key_id         = [for key in oci_kms_key.keys : key.id if key.display_name == each.value.key_name]
+  key_id         = [for key in oci_kms_key.keys : key.id if key.display_name == each.value.key_name][0]
   vault_id       = oci_kms_vault.vault.id
   secret_name    = each.key
 
