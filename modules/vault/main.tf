@@ -58,7 +58,10 @@ resource "oci_identity_policy" "policy" {
   description    = "policy created by terraform"
   name           = "${var.vault_name}-policy"
 
-  statements = [for key in oci_kms_key.master_keys : "Allow service blockstorage, objectstorage-${var.region}, oke, queue to use keys in compartment ${data.oci_identity_compartment.compartment.name} where target.key.id = '${key.id}'"]
+  statements = flatten([
+    [for key in oci_kms_key.master_keys : "Allow service blockstorage, objectstorage-${var.region}, oke, queue to use keys in compartment ${data.oci_identity_compartment.compartment.name} where target.key.id = '${key.id}'"],
+    [for key in oci_kms_key.master_keys : "Allow any-user to use keys in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type = 'cluster', target.key.id = '${key.id}'}"]
+  ])
 
   # tags
   defined_tags  = var.tags.definedTags
