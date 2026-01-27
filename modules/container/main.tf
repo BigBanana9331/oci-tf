@@ -253,7 +253,7 @@ resource "oci_containerengine_node_pool" "node_pool" {
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
   # ssh_public_key     = jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"]
-  ssh_public_key = "ssh-rsa ${base64encode(jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"])} worker"
+  ssh_public_key = "ssh-rsa ${base64encode(jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"])} opc"
   node_metadata  = each.value.node_metadata
 
   dynamic "initial_node_labels" {
