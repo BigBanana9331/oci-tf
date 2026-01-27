@@ -63,7 +63,7 @@ variable "secrets" {
     description            = optional(string)
     metadata               = optional(map(string))
     enable_auto_generation = optional(bool)
-    key_name               = optional(string, "master-key")
+    key_name               = optional(string)
     generation_template    = optional(string)
     generation_type        = optional(string)
     passphrase_length      = optional(number)
@@ -73,6 +73,7 @@ variable "secrets" {
     "dev-mysql-admin-password" = {
       description            = "MySQL admin password"
       enable_auto_generation = true
+      key_name               = "encryption-key"
       generation_template    = "DBAAS_DEFAULT_PASSWORD"
       generation_type        = "PASSPHRASE"
       passphrase_length      = 24
@@ -80,6 +81,7 @@ variable "secrets" {
     "dev-nodepool-ssh-key" = {
       description            = "Nodepool instnaces SSH key"
       enable_auto_generation = true
+      key_name               = "encryption-key"
       generation_template    = "RSA_2048"
       generation_type        = "SSH_KEY"
     }
