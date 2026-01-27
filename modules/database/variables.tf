@@ -3,11 +3,7 @@ terraform {
   required_providers {
     oci = {
       source  = "oracle/oci"
-      version = "7.30.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.8.0"
+      version = "7.31.0"
     }
   }
 }
@@ -54,16 +50,42 @@ variable "mysql_version" {
 variable "access_mode" {
   type     = string
   nullable = true
-  default  = null
+  default  = "UNRESTRICTED"
+}
+
+variable "database_mode" {
+  type    = string
+  default = "READ_WRITE"
 }
 
 variable "crash_recovery" {
   type     = string
   nullable = true
-  default  = null
+  default  = "ENABLED"
 }
 
 variable "database_management" {
+  type     = string
+  nullable = true
+  default  = "DISABLED"
+}
+
+variable "port" {
+  type    = number
+  default = 3306
+}
+
+variable "port_x" {
+  type    = number
+  default = 33306
+}
+
+variable "hostname_label" {
+  type    = string
+  default = "dev-mysql"
+}
+
+variable "ip_address" {
   type     = string
   nullable = true
   default  = null
@@ -84,23 +106,26 @@ variable "admin_password_secret_name" {
   default = "dev-mysql-admin-password"
 }
 
-variable "admin_password" {
-  type = object({
-    display_name = string
-    description  = optional(string)
-    metadata     = optional(map(string))
-    content_type = optional(string, "BASE64")
-    name         = optional(string)
-    stage        = optional(string)
-  })
-  default = {
-    display_name = "HeatWave-DBSystem-admin-password"
-  }
-}
 variable "key_name" {
   type     = string
   nullable = true
   default  = "encryption-key"
+}
+
+variable "key_generation_type" {
+  type    = string
+  default = "BYOK" # BYOK/SYSTEM
+}
+
+variable "certificate_generation_type" {
+  type    = string
+  default = "SYSTEM"
+}
+
+variable "certificate_id" {
+  type     = string
+  nullable = true
+  default  = null
 }
 
 variable "display_name" {
@@ -115,40 +140,79 @@ variable "description" {
 
 variable "data_storage_size_in_gb" {
   type    = string
-  default = "100"
+  default = "50"
 }
 
-variable "is_auto_expand_storage_enabled" {
-  type    = bool
-  default = false
-}
-
-variable "max_storage_size_in_gbs" {
-  type    = string
-  default = "4000"
-}
 
 variable "is_highly_available" {
   type    = bool
   default = false
 }
 
+variable "data_storage" {
+  type = object({
+    is_auto_expand_storage_enabled = optional(bool)
+    max_storage_size_in_gbs        = optional(string)
+  })
+  default = {
+    is_auto_expand_storage_enabled = false
+    max_storage_size_in_gbs        = "100"
+  }
+}
+
 variable "backup_policy" {
   type = object({
-    is_enabled        = string
-    retention_in_days = string
-    window_start_time = string
+    is_enabled        = optional(string)
+    retention_in_days = optional(string)
+    window_start_time = optional(string)
+    soft_delete       = optional(string)
+    pitr_enabled      = optional(bool)
   })
   default = {
     is_enabled        = "false"
-    retention_in_days = "7"
+    retention_in_days = "1"
     window_start_time = "01:00-00:00"
   }
 }
 
-variable "maintenance_window_start_time" {
-  type    = string
-  default = "sun 01:00"
+variable "deletion_policy" {
+  type = object({
+    automatic_backup_retention = optional(string)
+    final_backup               = optional(string)
+    is_delete_protected        = optional(bool)
+  })
+  default = {
+    automatic_backup_retention = "RETAIN"
+    final_backup               = "SKIP_FINAL_BACKUP"
+    is_delete_protected        = "false"
+  }
+}
+
+variable "read_endpoint" {
+  type = object({
+    exclude_ips    = optional(list(string))
+    is_enabled     = optional(bool)
+    hostname_label = optional(string)
+    ip_address     = optional(string)
+  })
+  default = {
+    is_enabled = false
+  }
+}
+
+variable "maintenance" {
+  type = object({
+    window_start_time         = string
+    maintenance_schedule_type = optional(string)
+    version_preference        = optional(string)
+    version_track_preference  = optional(string)
+  })
+  default = {
+    window_start_time         = "sun 01:00"
+    maintenance_schedule_type = "REGULAR"
+    version_preference        = "OLDEST"
+    version_track_preference  = "FOLLOW"
+  }
 }
 
 variable "database_console" {
@@ -156,6 +220,19 @@ variable "database_console" {
     status = string
     port   = optional(number)
   })
-  default  = null
-  nullable = true
+  default = {
+    status = "DISABLED"
+    port   = "8443"
+  }
+}
+
+variable "rest" {
+  type = object({
+    configuration = string
+    port          = optional(number)
+  })
+  default = {
+    configuration = "DISABLED"
+    port          = "443"
+  }
 }

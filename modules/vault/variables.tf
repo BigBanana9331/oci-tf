@@ -66,7 +66,7 @@ variable "secrets" {
       enable_auto_generation = true
       generation_template    = "DBAAS_DEFAULT_PASSWORD"
       generation_type        = "PASSPHRASE"
-      passphrase_length      = 32
+      passphrase_length      = 24
     }
     "dev-nodepool-ssh-key" = {
       description            = "Nodepool instnaces SSH key"
