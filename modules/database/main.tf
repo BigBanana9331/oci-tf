@@ -51,7 +51,7 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   shape_name              = var.shape_name
   data_storage_size_in_gb = var.data_storage_size_in_gb
   admin_username          = var.admin_username
-  admin_password          = data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content
+  admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
 
   subnet_id = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.subnet_name][0]
   nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :

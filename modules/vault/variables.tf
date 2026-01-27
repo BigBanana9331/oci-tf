@@ -27,10 +27,10 @@ variable "vault_type" {
   default = "DEFAULT" # DEFAULT, VIRTUAL_PRIVATE
 }
 
-variable "keys" {
+variable "master_keys" {
   type = map(object({
-    key_shape_algorithm       = string
-    key_shape_length          = string
+    algorithm                 = string
+    length                    = number
     protection_mode           = optional(string)
     is_auto_rotation_enabled  = optional(bool)
     last_rotation_message     = optional(string)
@@ -41,10 +41,34 @@ variable "keys" {
     time_of_schedule_start    = optional(string)
   }))
   default = {
+    "master-key" = {
+      protection_mode = "SOFTWARE"
+      algorithm       = "AES"
+      length          = 32
+    }
+  }
+}
+
+variable "generated_keys" {
+  type = map(object({
+    master_key_name       = string
+    algorithm             = string
+    length                = number
+    include_plaintext_key = optional(bool, false)
+    curve_id              = optional(string)
+    associated_data       = optional(map(string))
+    logging_context       = optional(map(string))
+  }))
+  default = {
     "encryption-key" = {
-      protection_mode     = "SOFTWARE"
-      key_shape_algorithm = "AES"
-      key_shape_length    = "32"
+      master_key_name = "master-key"
+      algorithm       = "AES"
+      length          = 32
+    }
+    "signning-key" = {
+      master_key_name = "master-key"
+      algorithm       = "RSA"
+      length          = 2048
     }
   }
 }
@@ -54,7 +78,7 @@ variable "secrets" {
     description            = optional(string)
     metadata               = optional(map(string))
     enable_auto_generation = optional(bool)
-    key_name               = optional(string, "encryption-key")
+    key_name               = optional(string, "master-key")
     generation_template    = optional(string)
     generation_type        = optional(string)
     passphrase_length      = optional(number)
