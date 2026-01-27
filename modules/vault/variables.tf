@@ -17,6 +17,10 @@ variable "compartment_id" {
   type = string
 }
 
+variable "region" {
+  type = string
+}
+
 variable "vault_name" {
   type    = string
   default = "dev-vault"
@@ -41,32 +45,13 @@ variable "master_keys" {
     time_of_schedule_start    = optional(string)
   }))
   default = {
-    "master-key" = {
+    "encryption-key" = {
       protection_mode = "SOFTWARE"
       algorithm       = "AES"
       length          = 32
     }
-  }
-}
-
-variable "generated_keys" {
-  type = map(object({
-    master_key_name       = string
-    algorithm             = string
-    length                = number
-    include_plaintext_key = optional(bool, false)
-    curve_id              = optional(string)
-    associated_data       = optional(map(string))
-    logging_context       = optional(map(string))
-  }))
-  default = {
-    "encryption-key" = {
-      master_key_name = "master-key"
-      algorithm       = "AES"
-      length          = 32
-    }
-    "signning-key" = {
-      master_key_name = "master-key"
+    "signing-key" = {
+      protection_mode = "SOFTWARE"
       algorithm       = "RSA"
       length          = 2048
     }

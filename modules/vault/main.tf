@@ -1,3 +1,7 @@
+data "oci_identity_compartment" "compartment" {
+  id = var.compartment_id
+}
+
 resource "oci_kms_vault" "vault" {
   #Required
   compartment_id = var.compartment_id
@@ -48,20 +52,23 @@ resource "oci_kms_key" "master_keys" {
   depends_on = [oci_kms_vault.vault]
 }
 
-resource "oci_kms_generated_key" "generated_keys" {
-  for_each              = var.generated_keys
-  crypto_endpoint       = oci_kms_vault.vault.crypto_endpoint
-  include_plaintext_key = each.value.include_plaintext_key
-  key_id                = [for key in oci_kms_key.master_keys : key.id if key.display_name == each.value.master_key_name][0]
+resource "oci_identity_policy" "policy" {
+  #Required
+  compartment_id = var.compartment_id
+  description    = "policy created by terraform"
+  name           = "oke-policy"
 
-  key_shape {
-    algorithm = each.value.algorithm
-    length    = each.value.length
-    curve_id  = each.value.curve_id
+  statements = [for key in oci_kms_key.master_keys : "Allow service blockstorage, objectstorage-${var.region}, oke, streaming to use keys in compartment ${data.oci_identity_compartment.compartment.name} where target.key.id = '${key.id}'"]
+
+  # tags
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
   }
 
-  associated_data = each.value.associated_data
-  logging_context = each.value.logging_context
+  depends_on = [oci_kms_key.master_keys]
 }
 
 resource "oci_vault_secret" "secrets" {
@@ -94,3 +101,4 @@ resource "oci_vault_secret" "secrets" {
   }
   depends_on = [oci_kms_key.master_keys]
 }
+

@@ -1,12 +1,16 @@
-provider "oci" {
-  region = "ap-singapore-1"
-}
-
 variable "tenancy_ocid" {
   type = string
 }
 variable "compartment_ocid" {
   type = string
+}
+
+variable "region" {
+  type = string
+}
+
+provider "oci" {
+  region = var.region
 }
 
 module "tag" {
@@ -23,6 +27,7 @@ module "loggroup" {
 module "vault" {
   source         = "./modules/vault"
   compartment_id = var.compartment_ocid
+  region         = var.region
   depends_on     = [module.tag]
 }
 

@@ -21,7 +21,7 @@ variable "vault_name" {
 variable "key_name" {
   type     = string
   nullable = true
-  default  = null
+  default  = "encryption-key"
 }
 
 variable "buckets" {
