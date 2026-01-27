@@ -21,12 +21,12 @@ variable "vault_name" {
 variable "key_name" {
   type     = string
   nullable = true
-  default  = "encryption-key"
+  default  = null
 }
 
 variable "buckets" {
   type    = set(string)
-  default = ["dev-objectstorage-infra", "dev-objectstorage-fe", "dev-objectstorage-be"]
+  default = ["dev-objectstorage-fe", "dev-objectstorage-be"]
 }
 
 variable "tags" {

@@ -81,3 +81,7 @@ module "database" {
   compartment_id = var.compartment_ocid
   depends_on     = [module.networking, module.vault]
 }
+
+output "secretbundle" {
+  value = module.database.secretbundle
+}

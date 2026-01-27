@@ -35,11 +35,10 @@ data "oci_vault_secrets" "secrets" {
 
 data "oci_secrets_secretbundle" "secretbundle" {
   secret_id = data.oci_vault_secrets.secrets.secrets[0].id
-  stage     = "CURRENT"
 }
 
-data "oci_secrets_secretbundle_versions" "secretbundle_versions" {
-  secret_id = data.oci_vault_secrets.secrets.secrets[0].id
+output "secretbundle" {
+  value = data.oci_secrets_secretbundle.secretbundle
 }
 
 resource "oci_mysql_mysql_db_system" "mysql_db_system" {

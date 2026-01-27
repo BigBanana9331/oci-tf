@@ -23,7 +23,7 @@ variable "vault_name" {
 variable "key_name" {
   type     = string
   nullable = true
-  default  = "encryption-key"
+  default  = null
 }
 
 variable "queue_dead_letter_queue_delivery_count" {
