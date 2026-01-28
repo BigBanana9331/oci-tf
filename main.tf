@@ -79,12 +79,12 @@ module "container" {
   depends_on     = [module.networking, module.loggroup, module.vault]
 }
 
-module "database" {
-  source         = "./modules/database"
-  tenancy_ocid   = var.tenancy_ocid
-  compartment_id = var.compartment_ocid
-  depends_on     = [module.networking, module.vault]
-}
+# module "database" {
+#   source         = "./modules/database"
+#   tenancy_ocid   = var.tenancy_ocid
+#   compartment_id = var.compartment_ocid
+#   depends_on     = [module.networking, module.vault]
+# }
 
 
 # data "oci_containerengine_cluster_kube_config" "cluster_kube_config" {

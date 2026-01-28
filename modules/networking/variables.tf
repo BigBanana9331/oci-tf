@@ -105,6 +105,16 @@ variable "security_lists" {
     "seclist-default" = {
       egress_security_rules = [
         {
+          protocol    = "6"
+          source      = "0.0.0.0/0"
+          source_type = "CIDR_BLOCK"
+          description = "TCP traffic for ports: 22 SSH Remote Login Protocol"
+          tcp_options = {
+            max = 22
+            min = 22
+          }
+        },
+        {
           protocol         = "1"
           destination      = "0.0.0.0/0"
           destination_type = "CIDR_BLOCK"
@@ -122,15 +132,15 @@ variable "security_lists" {
           icmp_options = {
             type = 3
           }
-        },
+        }
       ]
 
-      ingress_security_rules = [
+      egress_security_rules = [
         {
-          protocol    = "all"
-          source      = "10.0.0.0/16"
-          source_type = "CIDR_BLOCK"
-          description = "All traffic for all ports"
+          protocol         = "all"
+          destination      = "0.0.0.0/0"
+          destination_type = "CIDR_BLOCK"
+          description      = "All traffic for all ports"
         }
       ]
     }
