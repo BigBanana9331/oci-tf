@@ -252,18 +252,15 @@ resource "oci_containerengine_node_pool" "node_pool" {
   compartment_id     = var.compartment_id
   kubernetes_version = var.kubernetes_version
   node_shape         = each.value.node_shape
+  node_metadata      = each.value.node_metadata
 
-  # ssh_public_key     = jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"]
-  # ssh_public_key = "ssh-rsa ${base64encode(jsondecode(base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content))["publicKey"])} opc"
-  # node_metadata = each.value.node_metadata
-
-  # dynamic "initial_node_labels" {
-  #   for_each = each.value.initial_node_labels != null ? each.value.initial_node_labels : {}
-  #   content {
-  #     key   = initial_node_labels.key
-  #     value = initial_node_labels.value
-  #   }
-  # }
+  dynamic "initial_node_labels" {
+    for_each = each.value.initial_node_labels != null ? each.value.initial_node_labels : {}
+    content {
+      key   = initial_node_labels.key
+      value = initial_node_labels.value
+    }
+  }
 
   node_shape_config {
     memory_in_gbs = each.value.node_shape_memory_in_gbs
@@ -362,29 +359,28 @@ resource "oci_logging_unified_agent_configuration" "unified_agent_configuration"
   }
 }
 
-# resource "oci_containerengine_addon" "metric_server_addon" {
-#   addon_name                       = "KubernetesMetricsServer"
-#   cluster_id                       = oci_containerengine_cluster.cluster.id
-#   remove_addon_resources_on_delete = true
+resource "oci_containerengine_addon" "metric_server_addon" {
+  addon_name                       = "KubernetesMetricsServer"
+  cluster_id                       = oci_containerengine_cluster.cluster.id
+  remove_addon_resources_on_delete = true
 
-#   depends_on = [oci_containerengine_addon.cert_manager_addon]
-# }
+  depends_on = [oci_containerengine_addon.cert_manager_addon]
+}
 
-# resource "oci_containerengine_addon" "auto_scaler_addon" {
-#   addon_name                       = "ClusterAutoscaler"
-#   cluster_id                       = oci_containerengine_cluster.cluster.id
-#   remove_addon_resources_on_delete = true
+resource "oci_containerengine_addon" "auto_scaler_addon" {
+  addon_name                       = "ClusterAutoscaler"
+  cluster_id                       = oci_containerengine_cluster.cluster.id
+  remove_addon_resources_on_delete = true
 
-#   configurations {
-#     key   = "authType"
-#     value = "workload"
-#   }
+  configurations {
+    key   = "authType"
+    value = "workload"
+  }
 
-#   configurations {
-#     key = "nodes"
-#     # value = "2:4:ocid1.nodepool.oc1.iad.aaaaaaaaae____ydq, 1:5:ocid1.nodepool.oc1.iad.aaaaaaaaah____bzr"
-#     value = join(", ", formatlist("1:2:%s", [for nodepool in oci_containerengine_node_pool.node_pool : nodepool.id]))
-#   }
+  configurations {
+    key   = "nodes"
+    value = join(", ", formatlist("1:2:%s", [for nodepool in oci_containerengine_node_pool.node_pool : nodepool.id]))
+  }
 
-#   depends_on = [oci_containerengine_node_pool.node_pool]
-# }
+  depends_on = [oci_containerengine_node_pool.node_pool]
+}

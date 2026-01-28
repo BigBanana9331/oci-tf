@@ -608,7 +608,7 @@ variable "nsgs" {
       },
       {
         direction        = "EGRESS"
-        protocol         = "1"
+        protocol         = "6"
         destination_type = "CIDR_BLOCK"
         destination      = "10.0.2.0/24"
         description      = "API Gateway to Load balancer"

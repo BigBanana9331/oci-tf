@@ -239,9 +239,11 @@ variable "node_pools" {
       node_nsg_names                      = ["dev-nsg-oke-workernode"]
       is_pv_encryption_in_transit_enabled = true
       key_name                            = "encryption-key"
+
       node_metadata = {
         meta = "meta1"
       }
+
       initial_node_labels = {
         label = "label1"
       }
