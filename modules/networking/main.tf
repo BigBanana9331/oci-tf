@@ -22,7 +22,7 @@ locals {
   ])
 
   network_entity_ids = {
-    natgw = oci_core_nat_gateway.nat_gateway.id
+    # natgw = oci_core_nat_gateway.nat_gateway.id
     svcgw = oci_core_service_gateway.service_gateway.id
   }
 
@@ -61,38 +61,38 @@ resource "oci_core_vcn" "vcn" {
   }
 }
 
-resource "oci_core_dhcp_options" "dhcp_options" {
-  compartment_id = var.compartment_id
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = var.dhcp_options_name
+# resource "oci_core_dhcp_options" "dhcp_options" {
+#   compartment_id = var.compartment_id
+#   vcn_id         = oci_core_vcn.vcn.id
+#   display_name   = var.dhcp_options_name
 
-  options {
-    type        = var.dhcp_options_type
-    server_type = var.dhcp_options_server_type
-  }
+#   options {
+#     type        = var.dhcp_options_type
+#     server_type = var.dhcp_options_server_type
+#   }
 
-  # tags
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
+#   # tags
+#   defined_tags  = var.tags.definedTags
+#   freeform_tags = var.tags.freeformTags
 
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [defined_tags, freeform_tags]
+#   }
+# }
 
-resource "oci_core_nat_gateway" "nat_gateway" {
-  compartment_id = var.compartment_id
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = var.nat_gateway_name
+# resource "oci_core_nat_gateway" "nat_gateway" {
+#   compartment_id = var.compartment_id
+#   vcn_id         = oci_core_vcn.vcn.id
+#   display_name   = var.nat_gateway_name
 
-  # tags
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
+#   # tags
+#   defined_tags  = var.tags.definedTags
+#   freeform_tags = var.tags.freeformTags
 
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [defined_tags, freeform_tags]
+#   }
+# }
 
 resource "oci_core_service_gateway" "service_gateway" {
   compartment_id = var.compartment_id
@@ -301,7 +301,7 @@ resource "oci_core_route_table" "route_tables" {
   }
 
   depends_on = [
-    oci_core_nat_gateway.nat_gateway,
+    # oci_core_nat_gateway.nat_gateway,
     oci_core_service_gateway.service_gateway
   ]
 }
@@ -315,15 +315,15 @@ resource "oci_core_subnet" "subnets" {
   cidr_block                 = each.value.cidr_block
   prohibit_internet_ingress  = each.value.prohibit_internet_ingress
   prohibit_public_ip_on_vnic = each.value.prohibit_public_ip_on_vnic
-  dhcp_options_id            = oci_core_dhcp_options.dhcp_options.id
   route_table_id             = local.route_tables[each.value.route_table_name]
-  security_list_ids          = [for sl in each.value.security_list_names : local.seclists[sl]]
+  # dhcp_options_id            = oci_core_dhcp_options.dhcp_options.id
+  # security_list_ids          = [for sl in each.value.security_list_names : local.seclists[sl]]
 
   # tags
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
 
   lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
+    ignore_changes = [defined_tags, freeform_tags, security_list_ids, dhcp_options_id]
   }
 }

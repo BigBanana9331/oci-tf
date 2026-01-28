@@ -5,6 +5,10 @@ terraform {
       source  = "oracle/oci"
       version = "~> 7.30"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
   }
 }
 

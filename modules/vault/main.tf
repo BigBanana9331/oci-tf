@@ -3,7 +3,6 @@ data "oci_identity_compartment" "compartment" {
 }
 
 resource "oci_kms_vault" "vault" {
-  #Required
   compartment_id = var.compartment_id
   display_name   = var.vault_name
   vault_type     = var.vault_type
@@ -74,6 +73,13 @@ resource "oci_identity_policy" "policy" {
   depends_on = [oci_kms_key.master_keys]
 }
 
+
+# Sleep 2m for Vault management endpoint cold start
+resource "time_sleep" "wait" {
+  create_duration = "2m"
+  depends_on      = [oci_kms_key.master_keys]
+}
+
 resource "oci_vault_secret" "secrets" {
   for_each       = var.secrets
   compartment_id = var.compartment_id
@@ -102,6 +108,6 @@ resource "oci_vault_secret" "secrets" {
   lifecycle {
     ignore_changes = [defined_tags, freeform_tags]
   }
-  depends_on = [oci_kms_key.master_keys]
+  depends_on = [oci_kms_key.master_keys, time_sleep.wait]
 }
 

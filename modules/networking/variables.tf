@@ -101,50 +101,8 @@ variable "security_lists" {
       }))
     })))
   }))
-  default = {
-    "seclist-default" = {
-      egress_security_rules = [
-        {
-          protocol    = "6"
-          source      = "0.0.0.0/0"
-          source_type = "CIDR_BLOCK"
-          description = "TCP traffic for ports: 22 SSH Remote Login Protocol"
-          tcp_options = {
-            max = 22
-            min = 22
-          }
-        },
-        {
-          protocol         = "1"
-          destination      = "0.0.0.0/0"
-          destination_type = "CIDR_BLOCK"
-          description      = "ICMP traffic for: 3, 4 Destination Unreachable: Fragmentation Needed and Don't Fragment was Set"
-          icmp_options = {
-            type = 3
-            code = 4
-          }
-        },
-        {
-          protocol         = "1"
-          destination      = "10.0.0.0/16"
-          destination_type = "CIDR_BLOCK"
-          description      = "ICMP traffic for: 3 Destination Unreachable"
-          icmp_options = {
-            type = 3
-          }
-        }
-      ]
-
-      egress_security_rules = [
-        {
-          protocol         = "all"
-          destination      = "0.0.0.0/0"
-          destination_type = "CIDR_BLOCK"
-          description      = "All traffic for all ports"
-        }
-      ]
-    }
-  }
+  nullable = true
+  default  = null
 }
 
 variable "route_tables" {
@@ -155,13 +113,13 @@ variable "route_tables" {
     destination_type    = optional(string)
   })))
   default = {
-    "routetable-default" = [
-      {
-        network_entity_name = "natgw"
-        destination         = "0.0.0.0/0"
-        destination_type    = "CIDR_BLOCK"
-        description         = "Rule for traffic to internet"
-      },
+    "routetable-private" = [
+      # {
+      #   network_entity_name = "natgw"
+      #   destination         = "0.0.0.0/0"
+      #   destination_type    = "CIDR_BLOCK"
+      #   description         = "Rule for traffic to internet"
+      # },
       {
         network_entity_name = "svcgw"
         destination         = "all-sin-services-in-oracle-services-network"
@@ -184,37 +142,37 @@ variable "subnets" {
   default = {
     "dev-subnet-oke-apiendpoint" = {
       cidr_block          = "10.0.0.0/30"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-oke-workernode" = {
       cidr_block          = "10.0.1.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-oke-serviceloadbalancer" = {
       cidr_block          = "10.0.2.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-bastion" = {
       cidr_block          = "10.0.3.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-mysql" = {
       cidr_block          = "10.0.4.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-apigateway" = {
       cidr_block          = "10.0.5.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     },
     "dev-subnet-privateendpoint" = {
       cidr_block          = "10.0.6.0/24"
-      route_table_name    = "routetable-default"
+      route_table_name    = "routetable-private"
       security_list_names = ["seclist-default"]
     }
   }
@@ -263,6 +221,35 @@ variable "nsgs" {
   default = {
     "dev-nsg-bastion" = [
       {
+        direction   = "INGRESS"
+        protocol    = "all"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Allow all ingress from VCN. Enhanced later"
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery for worker nodes"
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
         direction        = "EGRESS"
         protocol         = "6"
         destination_type = "CIDR_BLOCK"
@@ -288,15 +275,37 @@ variable "nsgs" {
           }
         }
       },
-      {
-        direction        = "EGRESS"
-        protocol         = "6"
-        destination_type = "SERVICE_CIDR_BLOCK"
-        destination      = "all-sin-services-in-oracle-services-network"
-        description      = "Allow bastion to communicate with OCI services"
-      },
     ]
     "dev-nsg-oke-serviceloadbalancer" = [
+      {
+        direction   = "INGRESS"
+        protocol    = "all"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Allow all ingress from VCN. Enhanced later"
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery for worker nodes"
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
       {
         direction        = "EGRESS"
         protocol         = "6"
@@ -318,18 +327,25 @@ variable "nsgs" {
         description      = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
         tcp_options = {
           destination_port_range = {
-            min = 12256
-            max = 12256
+            min = 10256
+            max = 10256
           }
         }
       },
       {
-        direction   = "INGRESS"
-        protocol    = "6"
-        source_type = "CIDR_BLOCK"
-        source      = "10.0.0.0/16"
-        description = "Allow all ingress from VCN. Enhanced later"
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 12256
+            max = 12256
+          }
+        }
       }
+
     ]
     "dev-nsg-oke-workernode" = [
       {
@@ -345,12 +361,6 @@ variable "nsgs" {
         source_type = "CIDR_BLOCK"
         source      = "10.0.2.0/24"
         description = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
-        tcp_options = {
-          destination_port_range = {
-            min = 10256
-            max = 10256
-          }
-        }
       },
       {
         direction   = "INGRESS"
@@ -363,6 +373,28 @@ variable "nsgs" {
             min = 22
             max = 22
           }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery"
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
         }
       },
       {
@@ -389,38 +421,6 @@ variable "nsgs" {
         destination_type = "CIDR_BLOCK"
         destination      = "10.0.0.0/30"
         description      = "Kubernetes worker to Kubernetes API endpoint communication."
-        tcp_options = {
-          destination_port_range = {
-            min = 6443
-            max = 6443
-          }
-        }
-      },
-      {
-        direction        = "EGRESS"
-        protocol         = "6"
-        destination_type = "CIDR_BLOCK"
-        destination      = "10.0.0.0/30"
-        description      = "Kubernetes worker to Kubernetes API endpoint communication."
-        tcp_options = {
-          destination_port_range = {
-            min = 12250
-            max = 12250
-          }
-        }
-      },
-      {
-        direction        = "EGRESS"
-        protocol         = "6"
-        destination_type = "CIDR_BLOCK"
-        destination      = "10.0.0.0/30"
-        description      = "To allow com with Kubelet API"
-        tcp_options = {
-          destination_port_range = {
-            min = 10250
-            max = 10250
-          }
-        }
       }
     ]
     "dev-nsg-oke-apiendpoint" = [
@@ -428,8 +428,8 @@ variable "nsgs" {
         direction   = "INGRESS"
         protocol    = "6"
         source_type = "CIDR_BLOCK"
-        source      = "10.0.1.0/24"
-        description = "Kubernetes worker to Kubernetes API endpoint communication."
+        source      = "10.0.0.0/16"
+        description = "All VCN to Kubernetes API endpoint communication."
         tcp_options = {
           destination_port_range = {
             min = 6443
@@ -467,7 +467,7 @@ variable "nsgs" {
         direction   = "INGRESS"
         protocol    = "1"
         source_type = "CIDR_BLOCK"
-        source      = "10.0.1.0/24"
+        source      = "10.0.0.0/16"
         description = "Path Discovery for worker nodes"
         icmp_options = {
           type = 3
@@ -475,16 +475,14 @@ variable "nsgs" {
         }
       },
       {
-        direction   = "INGRESS"
-        protocol    = "6"
-        source_type = "CIDR_BLOCK"
-        source      = "10.0.3.0/24"
-        description = "Allow bastion to Kubernetes API endpoint communication."
-        tcp_options = {
-          destination_port_range = {
-            min = 6443
-            max = 6443
-          }
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
         }
       },
       {
@@ -498,19 +496,8 @@ variable "nsgs" {
         direction        = "EGRESS"
         protocol         = "6"
         destination_type = "CIDR_BLOCK"
-        destination      = "10.0.1.0/24"
-        description      = "All traffic to worker nodes (when using flannel for pod networking)."
-      },
-      {
-        direction        = "EGRESS"
-        protocol         = "1"
-        destination_type = "CIDR_BLOCK"
-        destination      = "0.0.0.0/0"
-        description      = "Path Discovery."
-        icmp_options = {
-          type = 3
-          code = 4
-        }
+        destination      = "10.0.0.0/16"
+        description      = "All traffic to VCN. Enhanced later"
       }
     ]
     "dev-nsg-mysql" = [
@@ -525,6 +512,43 @@ variable "nsgs" {
             min = 3306
             max = 3306
           }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.3.0/24"
+        description = "Bastion to database"
+        tcp_options = {
+          destination_port_range = {
+            min = 3306
+            max = 3306
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.6.0/24"
+        description = "Private Endpoint to database"
+        tcp_options = {
+          destination_port_range = {
+            min = 3306
+            max = 3306
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery"
+        icmp_options = {
+          type = 3
+          code = 4
         }
       },
       {
@@ -545,8 +569,37 @@ variable "nsgs" {
         destination      = "all-sin-services-in-oracle-services-network"
         description      = "Allow nodes to communicate with OCI services"
       },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.0.0/16"
+        description      = "Allow to communicate within VCN. Enhance later"
+      },
     ]
     "dev-nsg-privateendpoint" = [
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery for worker nodes"
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
       {
         direction        = "EGRESS"
         protocol         = "6"
@@ -583,19 +636,6 @@ variable "nsgs" {
     ]
     "dev-nsg-apigateway" = [
       {
-        direction        = "EGRESS"
-        protocol         = "6"
-        destination_type = "CIDR_BLOCK"
-        destination      = "10.0.2.0/24"
-        description      = "Allow traffic to worker nodes."
-        tcp_options = {
-          destination_port_range = {
-            min = 443
-            max = 443
-          }
-        }
-      },
-      {
         direction   = "INGRESS"
         protocol    = "6"
         source_type = "CIDR_BLOCK"
@@ -607,7 +647,29 @@ variable "nsgs" {
             max = 443
           }
         }
-      }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "1"
+        source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/16"
+        description = "Path Discovery for worker nodes"
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "1"
+        destination_type = "CIDR_BLOCK"
+        destination      = "0.0.0.0/0"
+        description      = "Path Discovery."
+        icmp_options = {
+          type = 3
+          code = 4
+        }
+      },
     ]
   }
 }
