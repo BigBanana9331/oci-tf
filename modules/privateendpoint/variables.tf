@@ -32,7 +32,7 @@ variable "private_endpoint" {
   default = {
     name        = "dev-rms-pe"
     vcn_name    = "dev-vcn"
-    subnet_name = "dev-subnet-privateendpoint"
-    nsg_id_list = []
+    subnet_name = "dev-subnet-bastion"
+    nsg_id_list = ["dev-nsg-bastion"]
   }
 }

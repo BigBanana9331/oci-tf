@@ -102,6 +102,5 @@ module "container" {
 #   source         = "./modules/kubernetes"
 #   compartment_id = var.compartment_ocid
 #   subnet_id      = module.networking.service_ib_subnet_id
-
 #   depends_on = [ module.container, module.privateendpoint ]
 # }

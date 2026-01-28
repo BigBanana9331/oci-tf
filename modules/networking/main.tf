@@ -22,8 +22,7 @@ locals {
   ])
 
   network_entity_ids = {
-    # natgw = oci_core_nat_gateway.nat_gateway.id
-    svcgw = oci_core_service_gateway.service_gateway.id
+    svcgw = oci_core_service_gateway.service_gateway[0].id
   }
 
   seclists = {
@@ -49,10 +48,9 @@ locals {
 
 resource "oci_core_vcn" "vcn" {
   compartment_id = var.compartment_id
-  cidr_blocks    = var.vcn_cidr_blocks
-  display_name   = var.vcn_name
+  cidr_blocks    = var.vcn.cidr_blocks
+  display_name   = var.vcn.name
 
-  # tags
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
 
@@ -61,40 +59,8 @@ resource "oci_core_vcn" "vcn" {
   }
 }
 
-# resource "oci_core_dhcp_options" "dhcp_options" {
-#   compartment_id = var.compartment_id
-#   vcn_id         = oci_core_vcn.vcn.id
-#   display_name   = var.dhcp_options_name
-
-#   options {
-#     type        = var.dhcp_options_type
-#     server_type = var.dhcp_options_server_type
-#   }
-
-#   # tags
-#   defined_tags  = var.tags.definedTags
-#   freeform_tags = var.tags.freeformTags
-
-#   lifecycle {
-#     ignore_changes = [defined_tags, freeform_tags]
-#   }
-# }
-
-# resource "oci_core_nat_gateway" "nat_gateway" {
-#   compartment_id = var.compartment_id
-#   vcn_id         = oci_core_vcn.vcn.id
-#   display_name   = var.nat_gateway_name
-
-#   # tags
-#   defined_tags  = var.tags.definedTags
-#   freeform_tags = var.tags.freeformTags
-
-#   lifecycle {
-#     ignore_changes = [defined_tags, freeform_tags]
-#   }
-# }
-
 resource "oci_core_service_gateway" "service_gateway" {
+  count          = var.service_gateway_name != null ? 1 : 0
   compartment_id = var.compartment_id
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = var.service_gateway_name
@@ -103,7 +69,6 @@ resource "oci_core_service_gateway" "service_gateway" {
     service_id = data.oci_core_services.services.services[0].id
   }
 
-  # tags
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
 
@@ -205,7 +170,6 @@ resource "oci_core_network_security_group" "network_security_groups" {
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = each.key
 
-  # tags
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
 
@@ -316,8 +280,8 @@ resource "oci_core_subnet" "subnets" {
   prohibit_internet_ingress  = each.value.prohibit_internet_ingress
   prohibit_public_ip_on_vnic = each.value.prohibit_public_ip_on_vnic
   route_table_id             = local.route_tables[each.value.route_table_name]
-  # dhcp_options_id            = oci_core_dhcp_options.dhcp_options.id
-  # security_list_ids          = [for sl in each.value.security_list_names : local.seclists[sl]]
+  dhcp_options_id            = each.value.dhcp_options_id
+  security_list_ids          = length(local.seclists) > 0 ? [for sl in each.value.security_list_names : local.seclists[sl]] : []
 
   # tags
   defined_tags  = var.tags.definedTags
