@@ -16,17 +16,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: 'Write Config & Key Files'
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: latest
-      
-      - name: 'Write Config & Key Files'
+
+      - name: Configure Terraform plugin cache
         run: |
-          mkdir ~/.oci
-          echo "${{secrets.OCI_CONFIG_FILE}}" >> ~/.oci/config
-          echo "${{secrets.OCI_KEY_FILE}}" >> ~/.oci/oci_api_key.pem
+          echo "TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache" >>"$GITHUB_ENV"
+          mkdir --parents "$HOME/.terraform.d/plugin-cache"
+          
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
       
       - name: Terraform Init
         run: terraform init

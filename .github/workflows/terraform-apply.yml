@@ -19,7 +19,20 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: latest
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      
+      - name: Configure Terraform plugin cache
+        run: |
+          echo "TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache" >>"$GITHUB_ENV"
+          mkdir --parents "$HOME/.terraform.d/plugin-cache"
+          
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
       
       - name: Terraform Init
         run: terraform init
