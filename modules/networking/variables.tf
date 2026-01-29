@@ -528,6 +528,19 @@ variable "nsgs" {
             max = 12250
           }
         }
+      },
+      {
+        direction        = "EGRESS"
+        protocol         = "6"
+        destination_type = "CIDR_BLOCK"
+        destination      = "10.0.1.0/24"
+        description      = "Allow Kubernetes control plane to communicate with Worker Nodes"
+        tcp_options = {
+          destination_port_range = {
+            min = 10250
+            max = 10250
+          }
+        }
       }
     ]
     "dev-nsg-mysql" = [
