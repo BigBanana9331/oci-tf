@@ -49,9 +49,7 @@ jobs:
           key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
           restore-keys: |
             terraform-${{ runner.os }}-
-      - name: Terraform Init
-        run: cat ~/.oci/config.tfbackend
-        
+
       - name: Terraform Init
         run: terraform init -backend-config=~/.oci/config.tfbackend -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
         
