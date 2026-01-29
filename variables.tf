@@ -59,3 +59,15 @@ variable "file_system" {
     tags             = object({ freeformTags = map(string), definedTags = map(string) })
   })
 }
+
+variable "log_group" {
+  nullable = true
+  default  = null
+  type = object({
+    compartment_id        = string
+    log_group_name        = string
+    key_name              = string
+    log_group_description = string
+    tags                  = object({ freeformTags = map(string), definedTags = map(string) })
+  })
+}

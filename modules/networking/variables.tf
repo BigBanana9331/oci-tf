@@ -343,6 +343,19 @@ variable "nsgs" {
         direction   = "INGRESS"
         protocol    = "6"
         source_type = "CIDR_BLOCK"
+        source      = "10.0.0.0/30"
+        description = "Allow Kubernetes API endpoint to communicate with worker nodes."
+        tcp_options = {
+          destination_port_range = {
+            min = 10250
+            max = 10250
+          }
+        }
+      },
+      {
+        direction   = "INGRESS"
+        protocol    = "6"
+        source_type = "CIDR_BLOCK"
         source      = "10.0.2.0/24"
         description = "Allow OCI load balancer or network load balancer to communicate with kube-proxy on worker nodes."
         tcp_options = {
