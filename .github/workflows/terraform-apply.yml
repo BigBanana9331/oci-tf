@@ -29,7 +29,7 @@ jobs:
           echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
           echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
           echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/state.config > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem ~/.oci/state.config
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -90,7 +90,7 @@ jobs:
           echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
           echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
           echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/state.config > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem ~/.oci/state.config
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
