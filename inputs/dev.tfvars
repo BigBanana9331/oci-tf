@@ -1,7 +1,3 @@
-app_name    = "helloapp"
-environment = "dev"
-profile     = "DEFAULT"
-
 vcns = {
   "vcn-0" = {
     cidr_blocks = ["10.0.0.0/16"]

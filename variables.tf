@@ -2,17 +2,12 @@ variable "compartment_ocid" {
   type = string
 }
 
-variable "profile" {
-  type = string
-}
-
 variable "tenancy_ocid" {
   type = string
 }
 
 variable "region" {
-  type     = string
-  nullable = true
+  type = string
 }
 
 variable "environment" {

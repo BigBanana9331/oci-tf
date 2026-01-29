@@ -8,12 +8,29 @@ permissions:
   deployments: write
 
 jobs:
-  apply:
+  plan:
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    env:
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_environment: ${{ matrix.environment }}
+      TF_VAR_app_name: ${{ env.TF_VAR_APP_NAME }}
+      
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: 'Write Config & Key Files'
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/state.config > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -35,30 +52,77 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
+        run: terraform init -backend-config=~/.oci/state.config
+        
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -var-file="inputs/${{ matrix.environment }}.tfvars -out=tfplan-${{ matrix.environment }}"
+
+      - name: Terraform Show
+        id: plan
+        run: terraform show tfplan-${{ matrix.environment }}"
+
+      - name: Cache Terraform Plan
+        uses: actions/cache/save@v4
+        with:
+          path: tfplan-${{ matrix.environment }}
+          key: tfplan-${{ github.run_id }}-${{ matrix.environment }}
+
+  apply:
+    runs-on: ubuntu-latest
+    needs: plan
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    environment:
+      name: ${{ matrix.environment }}
+    env:
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_environment: ${{ matrix.environment }}
+      TF_VAR_app_name: ${{ env.TF_VAR_APP_NAME }}
+    steps:   
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: 'Write Config & Key Files'
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/state.config > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+      
+      - name: Configure Terraform plugin cache
+        run: |
+          echo "TF_PLUGIN_CACHE_DIR=$HOME/.terraform.d/plugin-cache" >>"$GITHUB_ENV"
+          mkdir --parents "$HOME/.terraform.d/plugin-cache"
+          
+      - name: Cache Terraform
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: |
+            terraform-${{ runner.os }}-
+      
+      - name: Terraform Init
+        run: terraform init -backend-config=~/.oci/state.config -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
+
+      - name: Restore Plan Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: tfplan-${{ matrix.environment }}
+          key: tfplan-${{ github.run_id }}-${{ matrix.environment }}
+          fail-on-cache-miss: true
+
       - name: Terraform Apply
         run: terraform apply -var-file="dev.tfvars" -auto-approve
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
-      
-      - name: Terraform Output
-        id: tf_output
-        run: terraform output -json > output.json
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
-      
-      - name: Upload Terraform Output
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-output
-          path: output.json
-          retention-days: 7

@@ -6,8 +6,9 @@ terraform {
       version = "~> 7.30"
     }
   }
+  backend "oci" {}
 }
 
 provider "oci" {
-  config_file_profile = var.profile
+  config_file_profile = "DEFAULT"
 }
