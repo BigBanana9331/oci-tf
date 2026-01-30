@@ -58,7 +58,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file="inputs/${{ matrix.environment }}.tfvars -out=tfplan-${{ matrix.environment }}"
+        run: terraform plan -var-file="inputs/${{ matrix.environment }}.tfvars" -out="tfplan-${{ matrix.environment }}"
 
       - name: Terraform Show
         run: terraform show tfplan-${{ matrix.environment }}"
