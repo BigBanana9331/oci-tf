@@ -15,10 +15,13 @@ jobs:
         environment: [dev, prod]
     env:
       TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
       TF_VAR_environment: ${{ matrix.environment }}
       TF_VAR_app_name: helloapp 
+      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
+      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -28,8 +31,7 @@ jobs:
           mkdir -p ~/.oci
           echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
           echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
-          echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/config.tfbackend > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem ~/.oci/config.tfbackend
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -51,7 +53,7 @@ jobs:
             terraform-${{ runner.os }}-
 
       - name: Terraform Init
-        run: terraform init -backend-config=~/.oci/config.tfbackend -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
+        run: terraform init -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
         
 
       - name: Terraform Plan
@@ -76,10 +78,13 @@ jobs:
       name: ${{ matrix.environment }}
     env:
       TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
       TF_VAR_environment: ${{ matrix.environment }}
       TF_VAR_app_name: helloapp
+      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
+      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+
     steps:   
       - name: Checkout code
         uses: actions/checkout@v4
@@ -89,8 +94,7 @@ jobs:
           mkdir -p ~/.oci
           echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
           echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
-          echo "${{ secrets.BACKEND_CONFIG_FILE }}" | tee ~/.oci/config.tfbackend > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem ~/.oci/config.tfbackend
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -112,7 +116,7 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init -backend-config=~/.oci/config.tfbackend -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
+        run: terraform init -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE"  -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
 
       - name: Restore Plan Cache
         uses: actions/cache/restore@v4
