@@ -60,8 +60,8 @@ jobs:
         id: plan
         run: terraform plan -var-file="inputs/${{ matrix.environment }}.tfvars" -out="tfplan-${{ matrix.environment }}"
 
-      - name: Terraform Show
-        run: terraform show tfplan-${{ matrix.environment }}
+      # - name: Terraform Show
+      #   run: terraform show tfplan-${{ matrix.environment }}
 
       - name: Cache Terraform Plan
         uses: actions/cache/save@v4
@@ -127,4 +127,4 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Terraform Apply
-        run: terraform apply -var-file="dev.tfvars" -auto-approve
+        run: terraform apply "tfplan-${{ matrix.environment }}" -auto-approve
