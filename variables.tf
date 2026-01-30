@@ -1,6 +1,5 @@
 variable "compartment_ocid" {
   type = string
-  ephemeral = true
 }
 
 variable "tenancy_ocid" {
