@@ -126,4 +126,4 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Terraform Apply
-        run: terraform apply "tfplan-${{ matrix.environment }}" -auto-approve
+        run: terraform apply tfplan-${{ matrix.environment }}
