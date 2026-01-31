@@ -32,6 +32,12 @@ variable "region" {
   }
 }
 
+variable "oci_config_profile" {
+  type        = string
+  description = "The OCI CLI configuration profile name to use for authentication"
+  default     = "DEFAULT"
+}
+
 variable "environment" {
   type        = string
   description = "The deployment environment (dev, staging, prod)"

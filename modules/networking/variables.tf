@@ -1,43 +1,52 @@
 variable "environment" {
-  type = string
+  type        = string
+  description = "The deployment environment (dev, staging, prod)"
 }
 
 variable "app_name" {
-  type = string
+  type        = string
+  description = "The application name used for resource naming conventions"
 }
 
 variable "compartment_id" {
-  type = string
+  type        = string
+  description = "The OCID of the compartment where networking resources will be created"
 }
 
 variable "tags" {
-  type    = object({ freeformTags = map(string), definedTags = map(string) })
-  default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
+  type        = object({ freeformTags = map(string), definedTags = map(string) })
+  description = "Resource tags for cost tracking and organization"
+  default     = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
 variable "vcn_name" {
-  type    = string
-  default = "vcn-0"
+  type        = string
+  description = "The display name suffix for the VCN"
+  default     = "vcn-0"
 }
 
 variable "cidr_blocks" {
-  type    = list(string)
-  default = ["10.0.0.0/16"]
+  type        = list(string)
+  description = "List of CIDR blocks for the VCN address space"
+  default     = ["10.0.0.0/16"]
 }
 
 variable "service_gateway_name" {
-  type     = string
-  nullable = true
-  default  = "sg-0"
+  type        = string
+  description = "The display name suffix for the Service Gateway. Set to null to skip creation."
+  nullable    = true
+  default     = "sg-0"
 }
 
 variable "nat_gateway_name" {
-  type     = string
-  nullable = true
-  default  = "ng-0"
+  type        = string
+  description = "The display name suffix for the NAT Gateway. Set to null to skip creation."
+  nullable    = true
+  default     = "ng-0"
 }
 
 variable "security_lists" {
+  description = "Map of security list configurations with ingress and egress rules"
   type = map(object({
     egress_security_rules = optional(set(object({
       protocol         = string
@@ -90,6 +99,7 @@ variable "security_lists" {
 }
 
 variable "route_tables" {
+  description = "Map of route table configurations with routing rules"
   type = map(set(object({
     network_entity_name = string
     description         = optional(string)
@@ -115,6 +125,7 @@ variable "route_tables" {
 }
 
 variable "subnets" {
+  description = "Map of subnet configurations including CIDR blocks, route tables, and security settings"
   type = map(object({
     cidr_block                 = string
     dhcp_options_name          = optional(string)
@@ -153,6 +164,7 @@ variable "subnets" {
 }
 
 variable "nsgs" {
+  description = "Map of Network Security Group configurations with security rules"
   type = map(list(object({
     direction        = string
     protocol         = string

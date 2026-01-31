@@ -20,6 +20,6 @@ locals {
     definedTags = var.tags.definedTags
   }
 
-  # Timestamp for unique resource naming when needed
-  timestamp = formatdate("YYYYMMDDhhmmss", timestamp())
+  # Note: timestamp() is intentionally removed as it causes plan changes on every run.
+  # If unique naming is needed, consider using random_id resource or pass timestamp as variable.
 }
