@@ -9,7 +9,7 @@
 
 # Default tags applied to all resources
 tags = {
-  definedTags  = {}
+  definedTags = {}
   freeformTags = {
     CreatedBy = "Terraform"
     Project   = "OCI Infrastructure"

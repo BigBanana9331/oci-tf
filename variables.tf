@@ -27,7 +27,7 @@ variable "region" {
   description = "The OCI region where resources will be provisioned (e.g., ap-singapore-1, us-ashburn-1)"
 
   validation {
-    condition = can(regex("^[a-z]{2,4}-[a-z]+-[0-9]+$", var.region))
+    condition     = can(regex("^[a-z]{2,4}-[a-z]+-[0-9]+$", var.region))
     error_message = "The region must be a valid OCI region identifier (e.g., ap-singapore-1)."
   }
 }

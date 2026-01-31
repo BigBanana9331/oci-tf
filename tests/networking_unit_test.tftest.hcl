@@ -74,14 +74,14 @@ mock_provider "oci" {
   # Mock VCN resource
   mock_resource "oci_core_vcn" {
     defaults = {
-      id              = "ocid1.vcn.oc1.ap-singapore-1.test123"
-      cidr_blocks     = ["10.0.0.0/16"]
-      compartment_id  = "ocid1.compartment.oc1..test"
-      display_name    = "dev-testapp-vcn-0"
-      state           = "AVAILABLE"
-      default_route_table_id    = "ocid1.routetable.oc1..default"
-      default_security_list_id  = "ocid1.securitylist.oc1..default"
-      default_dhcp_options_id   = "ocid1.dhcpoptions.oc1..default"
+      id                       = "ocid1.vcn.oc1.ap-singapore-1.test123"
+      cidr_blocks              = ["10.0.0.0/16"]
+      compartment_id           = "ocid1.compartment.oc1..test"
+      display_name             = "dev-testapp-vcn-0"
+      state                    = "AVAILABLE"
+      default_route_table_id   = "ocid1.routetable.oc1..default"
+      default_security_list_id = "ocid1.securitylist.oc1..default"
+      default_dhcp_options_id  = "ocid1.dhcpoptions.oc1..default"
     }
   }
 

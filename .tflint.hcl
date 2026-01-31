@@ -28,15 +28,6 @@ rule "terraform_comment_syntax" {
 rule "terraform_naming_convention" {
   enabled = true
   format  = "snake_case"
-  
-  custom_formats = {
-    module      = { regex = "^[a-z][a-z0-9_]*$" }
-    resource    = { regex = "^[a-z][a-z0-9_]*$" }
-    data_source = { regex = "^[a-z][a-z0-9_]*$" }
-    variable    = { regex = "^[a-z][a-z0-9_]*$" }
-    output      = { regex = "^[a-z][a-z0-9_]*$" }
-    local       = { regex = "^[a-z][a-z0-9_]*$" }
-  }
 }
 
 # Ensure terraform and provider version constraints are specified

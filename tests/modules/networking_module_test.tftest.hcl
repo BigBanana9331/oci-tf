@@ -10,11 +10,11 @@
 mock_provider "oci" {
   mock_resource "oci_core_vcn" {
     defaults = {
-      id              = "ocid1.vcn.oc1.ap-singapore-1.test123"
-      cidr_blocks     = ["10.0.0.0/16"]
-      compartment_id  = "ocid1.compartment.oc1..test"
-      display_name    = "test-vcn"
-      state           = "AVAILABLE"
+      id             = "ocid1.vcn.oc1.ap-singapore-1.test123"
+      cidr_blocks    = ["10.0.0.0/16"]
+      compartment_id = "ocid1.compartment.oc1..test"
+      display_name   = "test-vcn"
+      state          = "AVAILABLE"
     }
   }
 
@@ -84,9 +84,9 @@ mock_provider "oci" {
     defaults = {
       services = [
         {
-          id          = "ocid1.service.oc1.ap-singapore-1.test"
-          name        = "All SIN Services In Oracle Services Network"
-          cidr_block  = "all-sin-services-in-oracle-services-network"
+          id         = "ocid1.service.oc1.ap-singapore-1.test"
+          name       = "All SIN Services In Oracle Services Network"
+          cidr_block = "all-sin-services-in-oracle-services-network"
         }
       ]
     }
@@ -252,11 +252,11 @@ run "test_nsg_rules_creation" {
     nsgs = {
       "nsg-web" = [
         {
-          direction        = "INGRESS"
-          protocol         = "6"
-          source_type      = "CIDR_BLOCK"
-          source           = "0.0.0.0/0"
-          description      = "Allow HTTPS from internet"
+          direction   = "INGRESS"
+          protocol    = "6"
+          source_type = "CIDR_BLOCK"
+          source      = "0.0.0.0/0"
+          description = "Allow HTTPS from internet"
           tcp_options = {
             destination_port_range = {
               min = 443
