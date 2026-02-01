@@ -94,6 +94,151 @@ certutil -encode oci_api_key.pem oci_api_key.b64  # Windows
 └── README.md
 ```
 
+## 🌍 Multi-Environment Deployment
+
+This project supports deploying to multiple environments (dev, staging, prod) with isolated configurations and state management.
+
+### Environment Structure
+
+```
+inputs/
+├── common.tfvars    # Shared tags, common settings (applied to ALL environments)
+├── dev.tfvars       # Development: VCNs, subnets, NSGs + environment variables
+└── prod.tfvars      # Production: VCNs, subnets, NSGs + environment variables
+```
+
+### Method 1: Using Makefile (Recommended)
+
+```bash
+# Development Environment
+make plan ENV=dev       # Preview changes for dev
+make apply ENV=dev      # Apply changes to dev
+
+# Production Environment
+make plan ENV=prod      # Preview changes for prod
+make apply ENV=prod     # Apply changes to prod
+
+# Other useful commands
+make validate ENV=dev   # Validate configuration
+make destroy ENV=prod   # Destroy infrastructure (use with caution!)
+make all ENV=dev        # Run fmt, validate, lint, and plan
+```
+
+### Method 2: Direct Terraform Commands
+
+```bash
+# Initialize
+terraform init
+
+# Development
+terraform plan \
+  -var-file=inputs/common.tfvars \
+  -var-file=inputs/dev.tfvars \
+  -out=tfplan.dev
+
+terraform apply tfplan.dev
+
+# Production
+terraform plan \
+  -var-file=inputs/common.tfvars \
+  -var-file=inputs/prod.tfvars \
+  -out=tfplan.prod
+
+terraform apply tfplan.prod
+```
+
+### Required Variables per Environment
+
+Each environment tfvars file (`dev.tfvars`, `prod.tfvars`) must include:
+
+```hcl
+# =============================================================================
+# Environment Configuration (Required)
+# =============================================================================
+environment      = "dev"                              # or "prod", "staging"
+app_name         = "myapp"                            # Application name for resource naming
+compartment_ocid = "ocid1.compartment.oc1..aaaa..."   # Environment-specific compartment
+tenancy_ocid     = "ocid1.tenancy.oc1..aaaa..."       # Your tenancy OCID
+region           = "ap-singapore-1"                   # OCI region
+
+# =============================================================================
+# VCN Configuration (Environment-specific)
+# =============================================================================
+vcns = {
+  "vcn-0" = {
+    cidr_blocks  = ["10.0.0.0/16"]
+    route_tables = { ... }
+    subnets      = { ... }
+    nsgs         = { ... }
+  }
+}
+```
+
+### State Isolation (Best Practice for Production)
+
+#### Option A: Terraform Workspaces
+
+```bash
+# Create workspaces for each environment
+terraform workspace new dev
+terraform workspace new prod
+
+# Switch and apply
+terraform workspace select dev
+make apply ENV=dev
+
+terraform workspace select prod
+make apply ENV=prod
+
+# List workspaces
+terraform workspace list
+```
+
+#### Option B: Separate Backend Configs (Recommended)
+
+Create backend configuration files:
+
+```hcl
+# backends/dev.hcl
+bucket   = "terraform-state"
+key      = "oci-tf/dev/terraform.tfstate"
+region   = "ap-singapore-1"
+endpoint = "https://<namespace>.compat.objectstorage.ap-singapore-1.oraclecloud.com"
+```
+
+```hcl
+# backends/prod.hcl
+bucket   = "terraform-state"
+key      = "oci-tf/prod/terraform.tfstate"
+region   = "ap-singapore-1"
+endpoint = "https://<namespace>.compat.objectstorage.ap-singapore-1.oraclecloud.com"
+```
+
+Initialize per environment:
+
+```bash
+# For development
+terraform init -backend-config=backends/dev.hcl -reconfigure
+
+# For production
+terraform init -backend-config=backends/prod.hcl -reconfigure
+```
+
+### Environment Naming Convention
+
+All resources are automatically prefixed with environment and app name:
+
+```
+{environment}-{app_name}-{resource_name}
+
+Examples:
+  dev-myapp-vcn-0
+  prod-myapp-subnet-oke-workernode
+  dev-myapp-nsg-bastion
+```
+
+---
+
 ## 💻 Local Development
 
 ### Initialize Terraform
