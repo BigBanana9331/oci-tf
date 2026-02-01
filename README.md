@@ -2,7 +2,35 @@
 
 Automated deployment of Oracle Cloud Infrastructure (OCI) resources using Terraform and GitHub Actions CI/CD pipelines.
 
-## 📋 Quick Start
+## � Table of Contents
+
+- [Quick Start](#-quick-start)
+- [Repository Structure](#-repository-structure)
+- [Multi-Environment Deployment](#-multi-environment-deployment)
+- [Local Development](#-local-development)
+- [Testing](#-testing)
+- [Linting](#-linting)
+- [Modules](#-modules)
+- [Runbook](#-runbook)
+  - [RB-01: Initial Project Setup](#-rb-01-initial-project-setup)
+  - [RB-02: Deploy to Development](#-rb-02-deploy-to-development-environment)
+  - [RB-03: Deploy to Production](#-rb-03-deploy-to-production-environment)
+  - [RB-04: Add a New Subnet](#-rb-04-add-a-new-subnet)
+  - [RB-05: Add a New NSG Rule](#-rb-05-add-a-new-nsg-rule)
+  - [RB-06: Import Existing Resource](#-rb-06-import-existing-oci-resource)
+  - [RB-07: Rollback a Deployment](#-rb-07-rollback-a-deployment)
+  - [RB-08: Destroy Environment](#-rb-08-destroy-environment)
+  - [RB-09: Debug Terraform Issues](#-rb-09-debug-terraform-issues)
+  - [RB-10: View Infrastructure State](#-rb-10-view-current-infrastructure-state)
+  - [RB-11: Upgrade Provider](#-rb-11-upgrade-terraform-provider)
+  - [RB-12: Rotate API Keys](#-rb-12-rotate-oci-api-keys)
+- [Troubleshooting](#-troubleshooting)
+- [Configuration](#-configuration)
+- [Resources](#-resources)
+
+---
+
+## �📋 Quick Start
 
 ### 1. Prerequisites
 
@@ -411,6 +439,328 @@ TF_LOG=DEBUG terraform plan -var-file="inputs/common.tfvars" -var-file="inputs/d
 | `queue` | Queue service | 🔜 Planned |
 | `tag` | Resource tagging | 🔜 Planned |
 | `vault` | OCI Vault (secrets management) | 🔜 Planned |
+
+---
+
+## 📖 Runbook
+
+This section provides step-by-step operational procedures for common tasks.
+
+### 🚀 RB-01: Initial Project Setup
+
+**When to use:** First time setting up the project on a new machine.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/khavo-25665261/oci-tf.git
+cd oci-tf
+
+# 2. Verify prerequisites
+terraform version    # Should be >= 1.7
+oci --version        # OCI CLI installed
+
+# 3. Configure OCI CLI (if not already done)
+oci setup config
+
+# 4. Verify OCI connectivity
+oci os ns get
+
+# 5. Initialize Terraform
+make init
+# OR: terraform init
+
+# 6. Validate configuration
+make validate ENV=dev
+```
+
+---
+
+### 🌱 RB-02: Deploy to Development Environment
+
+**When to use:** Deploying new changes to the dev environment.
+
+```bash
+# 1. Ensure you're on the correct branch
+git checkout main
+git pull origin main
+
+# 2. Format and validate
+make fmt
+make validate ENV=dev
+
+# 3. Review the plan
+make plan ENV=dev
+
+# 4. Review the plan output carefully, then apply
+make apply ENV=dev
+
+# 5. Verify outputs
+terraform output
+```
+
+---
+
+### 🏭 RB-03: Deploy to Production Environment
+
+**When to use:** Deploying approved changes to production.
+
+⚠️ **Production Checklist:**
+- [ ] Changes tested in dev environment
+- [ ] PR approved and merged to main
+- [ ] Backup of current state taken
+- [ ] Stakeholders notified
+
+```bash
+# 1. Ensure you're on main branch with latest changes
+git checkout main
+git pull origin main
+
+# 2. Validate configuration
+make validate ENV=prod
+
+# 3. Create and review plan (REVIEW CAREFULLY!)
+make plan ENV=prod
+
+# 4. Apply with explicit confirmation
+terraform apply tfplan.prod
+
+# 5. Verify deployment
+terraform output
+oci network vcn list --compartment-id $COMPARTMENT_OCID
+```
+
+---
+
+### 🔄 RB-04: Add a New Subnet
+
+**When to use:** Adding a new subnet to an existing VCN.
+
+```bash
+# 1. Edit the environment tfvars file
+vi inputs/dev.tfvars
+
+# 2. Add the subnet configuration under the appropriate VCN
+# Example:
+#   "subnet-new-service" = {
+#     cidr_block       = "10.0.10.0/24"
+#     route_table_name = "routetable-private"
+#   }
+
+# 3. Plan and review
+make plan ENV=dev
+
+# 4. Apply changes
+make apply ENV=dev
+```
+
+---
+
+### 🔐 RB-05: Add a New NSG Rule
+
+**When to use:** Adding security rules to a Network Security Group.
+
+```bash
+# 1. Edit the environment tfvars file
+vi inputs/dev.tfvars
+
+# 2. Add the rule to the appropriate NSG
+# Example for ingress rule:
+#   {
+#     direction   = "INGRESS"
+#     protocol    = "6"              # TCP
+#     source_type = "CIDR_BLOCK"
+#     source      = "10.0.0.0/16"
+#     description = "Allow HTTPS from VCN"
+#     tcp_options = {
+#       destination_port_range = { min = 443, max = 443 }
+#     }
+#   }
+
+# 3. Plan and apply
+make plan ENV=dev
+make apply ENV=dev
+```
+
+---
+
+### 📥 RB-06: Import Existing OCI Resource
+
+**When to use:** Bringing existing OCI resources under Terraform management.
+
+```bash
+# 1. Get the resource OCID from OCI Console
+
+# 2. Add the resource configuration to your .tf files first
+
+# 3. Import the resource
+terraform import \
+  -var-file=inputs/common.tfvars \
+  -var-file=inputs/dev.tfvars \
+  'module.vcn["vcn-0"].oci_core_vcn.vcn' \
+  ocid1.vcn.oc1.ap-singapore-1.aaaa...
+
+# 4. Run plan to verify state matches configuration
+make plan ENV=dev
+
+# 5. If there are diffs, adjust configuration to match
+```
+
+---
+
+### 🔙 RB-07: Rollback a Deployment
+
+**When to use:** Reverting to a previous state after a failed deployment.
+
+```bash
+# Option A: Revert code and re-apply
+git log --oneline -5                    # Find the commit to revert to
+git revert HEAD                         # Revert last commit
+make plan ENV=dev
+make apply ENV=dev
+
+# Option B: Restore from state backup (if available)
+cp terraform.tfstate.backup terraform.tfstate
+make plan ENV=dev
+
+# Option C: Targeted destroy and recreate
+terraform destroy -target=module.vcn["vcn-0"].oci_core_subnet.subnets["subnet-problematic"] \
+  -var-file=inputs/common.tfvars \
+  -var-file=inputs/dev.tfvars
+make apply ENV=dev
+```
+
+---
+
+### 🗑️ RB-08: Destroy Environment
+
+**When to use:** Tearing down an entire environment (e.g., cleanup after testing).
+
+⚠️ **WARNING: This is destructive and irreversible!**
+
+```bash
+# 1. List all resources that will be destroyed
+terraform state list
+
+# 2. Create a backup of the state
+cp terraform.tfstate terraform.tfstate.backup.$(date +%Y%m%d)
+
+# 3. Destroy with confirmation
+make destroy ENV=dev
+
+# 4. Verify destruction
+terraform state list   # Should be empty
+```
+
+---
+
+### 🔍 RB-09: Debug Terraform Issues
+
+**When to use:** Troubleshooting plan/apply failures.
+
+```bash
+# 1. Enable debug logging
+export TF_LOG=DEBUG
+export TF_LOG_PATH=./terraform-debug.log
+
+# 2. Run the failing command
+make plan ENV=dev
+
+# 3. Review the log
+less terraform-debug.log
+
+# 4. Common fixes:
+
+# Fix: State lock stuck
+terraform force-unlock LOCK_ID
+
+# Fix: Provider authentication
+oci os ns get   # Test OCI connectivity
+
+# Fix: State corruption
+terraform state pull > state-backup.json
+terraform state push state-backup.json
+
+# 5. Clean up
+unset TF_LOG TF_LOG_PATH
+rm terraform-debug.log
+```
+
+---
+
+### 📊 RB-10: View Current Infrastructure State
+
+**When to use:** Auditing what's currently deployed.
+
+```bash
+# List all managed resources
+terraform state list
+
+# Show details of a specific resource
+terraform state show 'module.vcn["vcn-0"].oci_core_vcn.vcn'
+
+# Get all outputs
+terraform output
+
+# Get specific output as JSON
+terraform output -json vcn_ids
+
+# Compare with OCI Console
+oci network vcn list --compartment-id $COMPARTMENT_OCID --output table
+```
+
+---
+
+### 🔄 RB-11: Upgrade Terraform Provider
+
+**When to use:** Updating to a new version of the OCI provider.
+
+```bash
+# 1. Check current version
+terraform version
+
+# 2. Update version constraint in terraform.tf
+# Change: version = "~> 7.30" to version = "~> 7.35"
+
+# 3. Upgrade providers
+terraform init -upgrade
+
+# 4. Review the changes
+terraform plan -var-file=inputs/common.tfvars -var-file=inputs/dev.tfvars
+
+# 5. Test in dev first, then promote to prod
+make apply ENV=dev
+# ... verify ...
+make apply ENV=prod
+```
+
+---
+
+### 🔒 RB-12: Rotate OCI API Keys
+
+**When to use:** Security key rotation or compromised credentials.
+
+```bash
+# 1. Generate new API key
+openssl genrsa -out ~/.oci/oci_api_key_new.pem 2048
+openssl rsa -pubout -in ~/.oci/oci_api_key_new.pem -out ~/.oci/oci_api_key_new_public.pem
+
+# 2. Upload new public key to OCI Console
+# Profile → API Keys → Add Public Key
+
+# 3. Update local config
+vi ~/.oci/config
+# Update key_file path
+
+# 4. Test connectivity
+oci os ns get
+
+# 5. Update GitHub Secrets
+# Settings → Secrets → Update OCI_API_KEY_PRIVATE
+
+# 6. Delete old key from OCI Console after verification
+```
+
+---
 
 ## 🔧 Troubleshooting
 
