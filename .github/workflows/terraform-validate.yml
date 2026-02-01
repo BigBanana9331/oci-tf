@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -50,22 +50,23 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
       
-  #     - name: TFLint
-  #       uses: terraform-linters/setup-tflint@v6
-  #       with:
-  #         cache: true
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
       
-  #     - name: Init TFLint
-  #       run: tflint --init
+      - name: Init TFLint
+        run: tflint --init
       
-  #     - name: Run TFLint
-  #       run: tflint --format compact
+      - name: Run TFLint
+        run: tflint --recursive --format compact
+        continue-on-error: true
 
   trivy-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
       
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.33.1

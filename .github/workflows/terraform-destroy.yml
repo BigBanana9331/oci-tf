@@ -3,27 +3,127 @@ name: Terraform Destroy
 on:
   workflow_dispatch:
     inputs:
-      confirm:
-        description: 'Type "destroy" to confirm'
+      environment:
+        description: 'Environment to destroy'
         required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      confirm:
+        description: 'Type "destroy-dev" or "destroy-prod" (must match environment)'
+        required: true
+      reason:
+        description: 'Reason for destruction (required for audit)'
+        required: true
+      ticket:
+        description: 'Ticket/Issue number (e.g., JIRA-123)'
+        required: false
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
-  destroy:
+  # =============================================================================
+  # Validation Gate - Prevents accidental destruction
+  # =============================================================================
+  validate:
     runs-on: ubuntu-latest
-    
+    outputs:
+      approved: ${{ steps.check.outputs.approved }}
     steps:
-      - name: Validate Confirmation
+      - name: Validate Confirmation Word
+        id: check
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "destroy" ]; then
-            echo "Destruction cancelled - confirmation word not provided"
+          EXPECTED="destroy-${{ github.event.inputs.environment }}"
+          ACTUAL="${{ github.event.inputs.confirm }}"
+          
+          echo "Expected: $EXPECTED"
+          echo "Received: $ACTUAL"
+          
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::❌ Confirmation failed! You must type '$EXPECTED' to destroy ${{ github.event.inputs.environment }}"
+            echo "approved=false" >> $GITHUB_OUTPUT
             exit 1
           fi
+          
+          echo "✅ Confirmation validated"
+          echo "approved=true" >> $GITHUB_OUTPUT
+      
+      - name: Audit Log
+        run: |
+          echo "=========================================="
+          echo "🔴 DESTRUCTION REQUEST"
+          echo "=========================================="
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Requested by: ${{ github.actor }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Ticket: ${{ github.event.inputs.ticket || 'N/A' }}"
+          echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "=========================================="
+
+  # =============================================================================
+  # Production Safety Gate - Extra approval for prod
+  # =============================================================================
+  prod-safety-check:
+    if: github.event.inputs.environment == 'prod'
+    runs-on: ubuntu-latest
+    needs: validate
+    environment: prod-destroy  # Requires separate approval in GitHub
+    steps:
+      - name: Production Destruction Warning
+        run: |
+          echo "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨"
+          echo ""
+          echo "    ⚠️  PRODUCTION DESTRUCTION APPROVED  ⚠️"
+          echo ""
+          echo "    This action is IRREVERSIBLE!"
+          echo "    All production resources will be deleted."
+          echo ""
+          echo "🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨"
+          echo ""
+          echo "Proceeding in 30 seconds..."
+          sleep 30
+
+  # =============================================================================
+  # Destroy Execution
+  # =============================================================================
+  destroy:
+    runs-on: ubuntu-latest
+    needs: [validate, prod-safety-check]
+    # Run if validation passed AND (not prod OR prod-safety passed)
+    if: |
+      always() && 
+      needs.validate.result == 'success' &&
+      (github.event.inputs.environment != 'prod' || needs.prod-safety-check.result == 'success')
+    environment: ${{ github.event.inputs.environment }}
+    env:
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
+      TF_VAR_app_name: ${{ vars.APP_NAME || 'helloapp' }}
+      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
+      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+    
+    steps:
+      - name: Final Warning
+        run: |
+          echo "🔴 DESTROYING ${{ github.event.inputs.environment }} ENVIRONMENT"
+          echo "Requested by: ${{ github.actor }}"
+          echo "Reason: ${{ github.event.inputs.reason }}"
       
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: 'Write Config & Key Files'
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -45,15 +145,15 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
+        run: terraform init -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
+      
+      - name: Terraform Plan Destroy
+        run: terraform plan -destroy -var-file="inputs/${{ github.event.inputs.environment }}.tfvars" -out=destroy-plan
       
       - name: Terraform Destroy
-        run: terraform destroy -var-file="dev.tfvars" -auto-approve
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
+        run: terraform apply destroy-plan
+      
+      - name: Destruction Complete
+        run: |
+          echo "✅ ${{ github.event.inputs.environment }} environment has been destroyed"
+          echo "Completed at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
