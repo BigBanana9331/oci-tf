@@ -1,10 +1,131 @@
 # OCI Infrastructure as Code with Terraform & GitHub Actions
 
 Automated deployment of Oracle Cloud Infrastructure (OCI) resources using Terraform and GitHub Actions CI/CD pipelines.
+## 🏗️ Architecture Overview
 
+### Infrastructure Deployment Flow
+
+```mermaid
+flowchart LR
+    subgraph Developer["👨‍💻 Developer"]
+        Code[Edit .tf files]
+        Commit[Git Commit/Push]
+    end
+
+    subgraph GitHub["⚙️ GitHub Actions"]
+        Validate[terraform validate]
+        Plan[terraform plan]
+        Apply[terraform apply]
+    end
+
+    subgraph OCI["☁️ Oracle Cloud"]
+        VCN[VCN]
+        Subnet[Subnets]
+        NSG[NSGs]
+        GW[Gateways]
+    end
+
+    Code --> Commit
+    Commit --> Validate
+    Validate --> Plan
+    Plan --> Apply
+    Apply --> VCN
+    VCN --> Subnet
+    VCN --> NSG
+    VCN --> GW
+```
+
+### Module Dependencies
+
+```mermaid
+flowchart TB
+    subgraph Root["📦 Root Module"]
+        main.tf
+        variables.tf
+        outputs.tf
+    end
+
+    subgraph Modules["🧩 Child Modules"]
+        networking["networking<br/>VCN, Subnets, NSGs"]
+        bastion["bastion<br/>Bastion Host"]
+        container["container<br/>OKE Cluster"]
+        database["database<br/>MySQL/ATP"]
+        apigateway["apigateway<br/>API Gateway"]
+        vault["vault<br/>Secrets"]
+        logging["logging<br/>Log Groups"]
+    end
+
+    subgraph Inputs["📥 Variable Files"]
+        common["common.tfvars"]
+        dev["dev.tfvars"]
+        prod["prod.tfvars"]
+    end
+
+    Inputs --> Root
+    Root --> networking
+    networking --> bastion
+    networking --> container
+    networking --> database
+    networking --> apigateway
+    vault --> container
+    vault --> database
+    logging --> container
+```
+
+### CI/CD Pipeline
+
+```mermaid
+flowchart LR
+    subgraph PR["Pull Request"]
+        A[Push to Branch] --> B[Validate & Lint]
+        B --> C[Plan]
+        C --> D[Comment on PR]
+    end
+
+    subgraph Merge["Merge to Main"]
+        E[Approve PR] --> F[Merge]
+        F --> G[Apply Dev]
+    end
+
+    subgraph Prod["Production"]
+        H[Manual Trigger] --> I[Plan Prod]
+        I --> J[Approve]
+        J --> K[Apply Prod]
+    end
+
+    D -.-> E
+    G -.-> H
+```
+
+### Environment Isolation
+
+```mermaid
+flowchart TB
+    subgraph Repo["📂 Repository"]
+        TF[Terraform Code]
+    end
+
+    subgraph Dev["🌱 Development"]
+        DevState[(dev/terraform.tfstate)]
+        DevVCN[dev-myapp-vcn-0]
+        DevSubnet[dev-myapp-subnet-*]
+    end
+
+    subgraph Prod["🏭 Production"]
+        ProdState[(prod/terraform.tfstate)]
+        ProdVCN[prod-myapp-vcn-0]
+        ProdSubnet[prod-myapp-subnet-*]
+    end
+
+    TF -->|dev.tfvars| Dev
+    TF -->|prod.tfvars| Prod
+    DevState --> DevVCN --> DevSubnet
+    ProdState --> ProdVCN --> ProdSubnet
+```
+
+---
 ## � Table of Contents
-
-- [Quick Start](#-quick-start)
+- [Architecture Overview](#️-architecture-overview)- [Quick Start](#-quick-start)
 - [Repository Structure](#-repository-structure)
 - [Multi-Environment Deployment](#-multi-environment-deployment)
 - [Local Development](#-local-development)
