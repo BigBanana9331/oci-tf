@@ -22,7 +22,7 @@ jobs:
       TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_environment: ${{ matrix.environment }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
       TF_VAR_app_name: helloapp 
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
@@ -65,13 +65,13 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        run: terraform plan -destroy -var-file="inputs/${{ matrix.environment }}.tfvars" -out="tfplan-destroy-${{ matrix.environment }}"
+        run: terraform plan -destroy -var-file="inputs/${{ github.event.inputs.environment }}.tfvars" -out="tfplan-destroy-${{ github.event.inputs.environment }}"
 
       - name: Cache Terraform Plan
         uses: actions/cache/save@v4
         with:
-          path: tfplan-destroy-${{ matrix.environment }}
-          key: tfplan-destroy-${{ github.run_id }}-${{ matrix.environment }}
+          path: tfplan-destroy-${{ github.event.inputs.environment }}
+          key: tfplan-destroy-${{ github.run_id }}-${{ github.event.inputs.environment }}
 
 
   destroy:
@@ -82,7 +82,7 @@ jobs:
       TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_environment: ${{ matrix.environment }}
+      TF_VAR_environment: ${{ github.event.inputs.environment }}
       TF_VAR_app_name: helloapp 
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
@@ -127,9 +127,9 @@ jobs:
       - name: Restore Plan Cache
         uses: actions/cache/restore@v4
         with:
-          path: tfplan-destroy-${{ matrix.environment }}
-          key: tfplan-destroy-${{ github.run_id }}-${{ matrix.environment }}
+          path: tfplan-destroy-${{ github.event.inputs.environment }}
+          key: tfplan-destroy-${{ github.run_id }}-${{ github.event.inputs.environment }}
           fail-on-cache-miss: true
 
       - name: Terraform Destroy
-        run: terraform destroy tfplan-${{ matrix.environment }}
+        run: terraform destroy tfplan-${{ github.event.inputs.environment }}
