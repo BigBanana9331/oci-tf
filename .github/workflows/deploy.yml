@@ -17,7 +17,7 @@ jobs:
       TF_VAR_app_name: ${{ vars.TF_VAR_APP_NAME }}
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: ${{ secrets.OCI_CONFIG_FILE }}
+      TF_VAR_config_file_profile: ${{ secrets.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
 
@@ -74,7 +74,7 @@ jobs:
       TF_VAR_app_name: ${{ vars.TF_VAR_APP_NAME }}
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_DEV }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: ${{ secrets.OCI_CONFIG_FILE }}
+      TF_VAR_config_file_profile: ${{ secrets.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
 
@@ -129,7 +129,7 @@ jobs:
       TF_VAR_app_name: ${{ vars.TF_VAR_APP_NAME }}
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: ${{ secrets.OCI_CONFIG_FILE }}
+      TF_VAR_config_file_profile: ${{ secrets.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
 
@@ -186,7 +186,7 @@ jobs:
       TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
       TF_VAR_app_name: ${{ vars.TF_VAR_APP_NAME }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: ${{ secrets.OCI_CONFIG_FILE }}
+      TF_VAR_config_file_profile: ${{ secrets.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
 
