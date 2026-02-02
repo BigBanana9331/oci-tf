@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_environment: dev
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_DEV }}
       TF_VAR_region: ${{ secrets.OCI_REGION }}
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
