@@ -111,7 +111,7 @@ resource "oci_logging_log_group" "log_group" {
 
 resource "oci_logging_log" "logs" {
   for_each           = var.logs
-  log_group_id       = oci_logging_log_groups.log_group.id
+  log_group_id       = oci_logging_log_group.log_group.id
   display_name       = join("-", [var.environment, each.key])
   log_type           = each.value.type
   is_enabled         = each.value.is_enabled
