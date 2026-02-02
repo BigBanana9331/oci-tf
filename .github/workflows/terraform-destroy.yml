@@ -132,4 +132,4 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Terraform Destroy
-        run: terraform destroy tfplan-destroy-${{ github.run_id }}-${{ github.event.inputs.environment }}
+        run: terraform apply tfplan-destroy-${{ github.event.inputs.environment }}
