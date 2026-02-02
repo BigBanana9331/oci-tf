@@ -1,3 +1,3 @@
-output "bastion_id" {
-  value = module.bastion.id
-}
+# output "bastion_id" {
+#   value = module.bastion.id
+# }

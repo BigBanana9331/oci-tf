@@ -1,4 +1,5 @@
 module "bastion" {
+  count          = var.bastion != null ? 1 : 0
   source                     = "./modules/bastion"
   compartment_id             = var.compartment_ocid
   environment                = var.environment
