@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - dev
+          - uat
           - prod
 
 permissions:
@@ -17,13 +18,12 @@ permissions:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
     env:
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
-      TF_VAR_app_name: helloapp 
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
     steps:
@@ -57,15 +57,11 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
+        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/helloapp/${{ github.event.inputs.environment }}.tfstate"
       
       - name: Terraform Plan
         id: plan
-        run: terraform plan -destroy -var-file="inputs/${{ github.event.inputs.environment }}.tfvars" -out="tfplan-destroy-${{ github.event.inputs.environment }}"
+        run: terraform plan -destroy -input=false -var-file="inputs/${{ github.event.inputs.environment }}.tfvars" -out="tfplan-destroy-${{ github.event.inputs.environment }}"
 
       - name: Cache Terraform Plan
         uses: actions/cache/save@v4
@@ -79,11 +75,11 @@ jobs:
     needs: plan
     environment: ${{ github.event.inputs.environment }}
     env:
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
       TF_VAR_environment: ${{ github.event.inputs.environment }}
-      TF_VAR_app_name: helloapp 
+      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
       BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
     steps:
@@ -118,11 +114,7 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/$TF_VAR_app_name/$TF_VAR_environment.tfstate"
-        env:
-          TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_region: ${{ secrets.OCI_REGION }}
+        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/helloapp/${{ github.event.inputs.environment }}.tfstate"
       
       - name: Restore Plan Cache
         uses: actions/cache/restore@v4
