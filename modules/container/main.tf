@@ -98,8 +98,8 @@ resource "oci_containerengine_cluster" "cluster" {
 
 resource "oci_logging_log_group" "log_group" {
   compartment_id = var.compartment_id
-  display_name   = join("-", [var.environment, var.log_group_name])
-  description    = var.log_group_description
+  display_name   = join("-", [var.environment, var.log_group.name])
+  description    = var.log_group.description
 
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags

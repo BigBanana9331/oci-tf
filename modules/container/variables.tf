@@ -29,15 +29,15 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
-variable "log_group_name" {
-  type    = string
-  default = "loggroup-0"
-}
-
-variable "log_group_description" {
-  type     = string
-  nullable = true
-  default  = null
+variable "log_group" {
+  type = object({
+    name        = string
+    description = optional(string)
+  })
+  default = {
+    description = "OKE loggroup"
+    name        = "oke-loggroup"
+  }
 }
 
 variable "instance_dynamic_group" {
@@ -120,8 +120,7 @@ variable "logs" {
       type        = "SERVICE"
       source_type = "OCISERVICE"
       service     = "oke-k8s-cp-prod"
-      # resource    = "dev-oke"
-      category = "all-service-logs"
+      category    = "all-service-logs"
     }
     "customlog-oke" = {
       type = "CUSTOM"
