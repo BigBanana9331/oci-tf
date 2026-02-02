@@ -1,13 +1,7 @@
 name: Terraform Validate
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'main.tf'
-      - 'variables.tf'
-      - 'modules/**'
-      - '.github/workflows/terraform-validate.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
