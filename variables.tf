@@ -32,6 +32,8 @@ variable "bastion" {
 
 
 variable "oke" {
+  nullable = true
+  default = null
   type = object({
     vcn_name                 = string
     cluster_name             = string

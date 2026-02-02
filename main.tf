@@ -11,6 +11,7 @@ module "bastion" {
 }
 
 module "oke" {
+  count = var.oke != null ? 1 : 0
   source         = "./modules/container"
   tenancy_ocid   = var.tenancy_ocid
   compartment_id = var.compartment_ocid
