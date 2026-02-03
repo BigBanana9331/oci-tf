@@ -1,0 +1,77 @@
+# =============================================================================
+# Pre-commit Configuration for Terraform
+# =============================================================================
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+# Docs: https://pre-commit.com/
+
+repos:
+  # Terraform formatting and validation
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.88.0
+    hooks:
+      # Format Terraform files
+      - id: terraform_fmt
+
+      # Validate Terraform configuration
+      - id: terraform_validate
+        args:
+          - --hook-config=--retry-once-with-cleanup=true
+
+      # Generate documentation
+      - id: terraform_docs
+        args:
+          - --args=--config=.terraform-docs.yml
+
+      # Run TFLint
+      - id: terraform_tflint
+        args:
+          - --args=--config=__GIT_WORKING_DIR__/.tflint.hcl
+
+      # Check for security issues with tfsec
+      - id: terraform_tfsec
+        args:
+          - --args=--concise-output
+          - --args=--exclude-downloaded-modules
+
+      # Check for security issues with Checkov
+      - id: terraform_checkov
+        args:
+          - --args=--quiet
+          - --args=--compact
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # Prevent large files from being committed
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      
+      # Check for files that contain merge conflict strings
+      - id: check-merge-conflict
+      
+      # Ensure files end with a newline
+      - id: end-of-file-fixer
+        exclude: '\.tfvars$'
+      
+      # Remove trailing whitespace
+      - id: trailing-whitespace
+        exclude: '\.tfvars$'
+      
+      # Check YAML files
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      
+      # Check JSON files
+      - id: check-json
+      
+      # Detect private keys
+      - id: detect-private-key
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
