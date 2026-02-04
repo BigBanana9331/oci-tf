@@ -112,3 +112,15 @@ variable "oke" {
     })
   })
 }
+
+variable "mysql" {
+  type = object({
+    vcn_name                = string
+    subnet_name             = string
+    nsg_names               = set(string)
+    shape_name              = string
+    display_name            = string
+    data_storage_size_in_gb = number
+    is_highly_available     = bool
+  })
+}

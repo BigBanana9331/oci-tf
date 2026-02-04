@@ -47,9 +47,8 @@ output "secretbundle" {
 
 resource "oci_identity_policy" "policy" {
   compartment_id = var.compartment_id
-  description    = "policy created by terraform"
-  name           = "dev-mysql-policy"
-
+  description    = var.policy.name
+  name           = join("-", [var.environment, var.policy.name])
   statements = [
     "Allow any-user to use key-delegate in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
     "Allow any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in compartment ${data.oci_identity_compartment.compartment.name} where request.principal.type = 'mysqldbsystem'",
@@ -75,7 +74,7 @@ resource "oci_identity_policy" "policy" {
 resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   compartment_id      = var.compartment_id
   availability_domain = data.oci_identity_availability_domains.availability_domains.availability_domains[0].name
-  display_name        = var.display_name
+  display_name        = join("-", [var.environment, var.display_name])
   description         = var.description
 
   is_highly_available     = var.is_highly_available
@@ -84,9 +83,9 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   admin_username          = var.admin_username
   admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
 
-  subnet_id = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == var.subnet_name][0]
+  subnet_id = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.subnet_name])][0]
   nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-  [for nsg_name in var.nsg_names : nsg.id if nsg.display_name == nsg_name]])
+  [for nsg_name in var.nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
 
   mysql_version       = var.mysql_version
   access_mode         = var.access_mode
@@ -96,7 +95,7 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   port                = var.port
   port_x              = var.port_x
   ip_address          = var.ip_address
-  hostname_label      = var.hostname_label
+  hostname_label      = join("-", [var.environment, var.hostname_label])
 
   dynamic "encrypt_data" {
     for_each = var.key_generation_type != null ? [1] : []
@@ -172,14 +171,13 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
       port   = var.database_console.port
     }
   }
-
   dynamic "maintenance" {
     for_each = var.maintenance != null ? [1] : []
     content {
-      window_start_time         = var.maintenance.window_start_time
-      maintenance_schedule_type = var.maintenance.maintenance_schedule_type
-      version_preference        = var.maintenance.version_preference
-      version_track_preference  = var.maintenance.version_track_preference
+      window_start_time = var.maintenance.window_start_time
+      # maintenance_schedule_type = var.maintenance.maintenance_schedule_type
+      # version_preference        = var.maintenance.version_preference
+      # version_track_preference  = var.maintenance.version_track_preference
     }
   }
 

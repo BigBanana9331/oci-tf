@@ -21,14 +21,18 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
+variable "environment" {
+  type = string
+}
+
 variable "vcn_name" {
   type    = string
-  default = "dev-vcn"
+  default = "vcn"
 }
 
 variable "subnet_name" {
   type    = string
-  default = "dev-subnet-mysql"
+  default = "subnet-mysql"
 }
 
 variable "nsg_names" {
@@ -77,12 +81,12 @@ variable "port" {
 
 variable "port_x" {
   type    = number
-  default = 33306
+  default = 33060
 }
 
 variable "hostname_label" {
   type    = string
-  default = "dev-mysql"
+  default = "mysql"
 }
 
 variable "ip_address" {
@@ -130,7 +134,7 @@ variable "certificate_id" {
 
 variable "display_name" {
   type    = string
-  default = "dev-mysql"
+  default = "mysql"
 }
 
 variable "description" {
@@ -160,17 +164,28 @@ variable "data_storage" {
   }
 }
 
+variable "policy" {
+  type = object({
+    name        = string
+    description = string
+  })
+  default = {
+    description = "policy created by terraform"
+    name        = "mysql-policy"
+  }
+}
+
 variable "backup_policy" {
   type = object({
-    is_enabled        = optional(string)
-    retention_in_days = optional(string)
+    is_enabled        = optional(bool)
+    retention_in_days = optional(number)
     window_start_time = optional(string)
     soft_delete       = optional(string)
     pitr_enabled      = optional(bool)
   })
   default = {
-    is_enabled        = "false"
-    retention_in_days = "1"
+    is_enabled        = false
+    retention_in_days = 1
     window_start_time = "01:00-00:00"
   }
 }
@@ -182,7 +197,7 @@ variable "deletion_policy" {
     is_delete_protected        = optional(bool)
   })
   default = {
-    automatic_backup_retention = "RETAIN"
+    automatic_backup_retention = "DELETED"
     final_backup               = "SKIP_FINAL_BACKUP"
     is_delete_protected        = "false"
   }

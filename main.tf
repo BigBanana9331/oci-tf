@@ -1,9 +1,8 @@
 module "bastion" {
-  count          = var.bastion != null ? 1 : 0
+  count                      = var.bastion != null ? 1 : 0
   source                     = "./modules/bastion"
   compartment_id             = var.compartment_ocid
   environment                = var.environment
-  app_name                   = var.app_name
   tags                       = local.tags
   vcn_name                   = var.bastion.vcn_name
   subnet_name                = var.bastion.subnet_name
@@ -17,7 +16,6 @@ module "oke" {
   tenancy_ocid   = var.tenancy_ocid
   compartment_id = var.compartment_ocid
   environment    = var.environment
-  app_name       = var.app_name
   tags           = local.tags
 
   vcn_name                    = var.oke.vcn_name
@@ -38,4 +36,20 @@ module "oke" {
   logs                        = var.oke.logs
   node_pools                  = var.oke.node_pools
   autoscaler                  = var.oke.autoscaler
+}
+
+module "mysql" {
+  count                   = var.mysql != null ? 1 : 0
+  source                  = "./modules/database"
+  tenancy_ocid            = var.tenancy_ocid
+  compartment_id          = var.compartment_ocid
+  environment             = var.environment
+  tags                    = local.tags
+  vcn_name                = var.mysql.vcn_name
+  subnet_name             = var.mysql.subnet_name
+  nsg_names               = var.mysql.nsg_names
+  shape_name              = var.mysql.shape_name
+  display_name            = var.mysql.display_name
+  data_storage_size_in_gb = var.mysql.data_storage_size_in_gb
+  is_highly_available     = var.mysql.is_highly_available
 }

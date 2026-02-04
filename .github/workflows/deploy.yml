@@ -29,9 +29,9 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ vars.OCI_CONFIG_FILE_UAT }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE_UAT }}" | tee ~/.oci/oci_api_key_dev.pem > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key_dev.pem
+          echo "${{ vars.OCI_CONFIG_FILE_DEV }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE_DEV }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

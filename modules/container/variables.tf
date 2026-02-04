@@ -21,7 +21,9 @@ variable "environment" {
 }
 
 variable "app_name" {
-  type = string
+  type     = string
+  nullable = true
+  default  = null
 }
 
 variable "tags" {
@@ -225,65 +227,6 @@ variable "services_cidr" {
 variable "pods_cidr" {
   type    = string
   default = "10.244.0.0/16"
-}
-
-variable "ca_certificate" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "client_id" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "configuration_file" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "groups_prefix" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "is_open_id_connect_auth_enabled" {
-  type     = bool
-  nullable = true
-  default  = null
-}
-
-variable "issuer_url" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "signing_algorithms" {
-  type     = list(string)
-  nullable = true
-  default  = null
-}
-
-variable "username_claim" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "username_prefix" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "required_claims" {
-  type    = map(string)
-  default = {}
 }
 
 variable "node_pools" {

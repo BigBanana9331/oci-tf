@@ -13,7 +13,9 @@ variable "environment" {
 }
 
 variable "app_name" {
-  type = string
+  type     = string
+  nullable = true
+  default  = null
 }
 
 variable "compartment_id" {
