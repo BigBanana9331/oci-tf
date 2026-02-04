@@ -8,7 +8,7 @@ data "oci_identity_compartment" "compartment" {
 
 data "oci_core_vcns" "vcns" {
   compartment_id = var.compartment_id
-  display_name   = var.vcn_name
+  display_name   = join("-", [var.environment,var.vcn_name])
 }
 
 data "oci_core_subnets" "subnets" {
@@ -21,29 +21,29 @@ data "oci_core_network_security_groups" "network_security_groups" {
   vcn_id         = data.oci_core_vcns.vcns.virtual_networks[0].id
 }
 
-data "oci_kms_vaults" "vaults" {
-  compartment_id = var.compartment_id
-}
+# data "oci_kms_vaults" "vaults" {
+#   compartment_id = var.compartment_id
+# }
 
-data "oci_kms_keys" "keys" {
-  compartment_id      = var.compartment_id
-  management_endpoint = [for vault in data.oci_kms_vaults.vaults.vaults : vault.management_endpoint if vault.display_name == var.vault_name][0]
-}
+# data "oci_kms_keys" "keys" {
+#   compartment_id      = var.compartment_id
+#   management_endpoint = [for vault in data.oci_kms_vaults.vaults.vaults : vault.management_endpoint if vault.display_name == var.vault_name][0]
+# }
 
-data "oci_vault_secrets" "secrets" {
-  compartment_id = var.compartment_id
-  name           = var.admin_password_secret_name
-  vault_id       = [for vault in data.oci_kms_vaults.vaults.vaults : vault.id if vault.display_name == var.vault_name][0]
-}
+# data "oci_vault_secrets" "secrets" {
+#   compartment_id = var.compartment_id
+#   name           = var.admin_password_secret_name
+#   vault_id       = [for vault in data.oci_kms_vaults.vaults.vaults : vault.id if vault.display_name == var.vault_name][0]
+# }
 
 
-data "oci_secrets_secretbundle" "secretbundle" {
-  secret_id = data.oci_vault_secrets.secrets.secrets[0].id
-}
+# data "oci_secrets_secretbundle" "secretbundle" {
+#   secret_id = data.oci_vault_secrets.secrets.secrets[0].id
+# }
 
-output "secretbundle" {
-  value = data.oci_secrets_secretbundle.secretbundle
-}
+# output "secretbundle" {
+#   value = data.oci_secrets_secretbundle.secretbundle
+# }
 
 resource "oci_identity_policy" "policy" {
   compartment_id = var.compartment_id
@@ -80,8 +80,8 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   is_highly_available     = var.is_highly_available
   shape_name              = var.shape_name
   data_storage_size_in_gb = var.data_storage_size_in_gb
-  admin_username          = var.admin_username
-  admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
+  # admin_username          = var.admin_username
+  # admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
 
   subnet_id = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.subnet_name])][0]
   nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :

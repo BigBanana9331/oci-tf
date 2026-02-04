@@ -118,7 +118,7 @@ variable "key_name" {
 
 variable "key_generation_type" {
   type    = string
-  default = "BYOK" # BYOK/SYSTEM
+  default = "SYSTEM" # BYOK/SYSTEM
 }
 
 variable "certificate_generation_type" {
