@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_environment: ${{ github.event.inputs.environment }}
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      BACKEND_CONFIG_BUCKET: ${{ vars[format('BACKEND_CONFIG_BUCKET_{0}', github.event.inputs.environment)] }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -33,8 +33,8 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          echo "${{ vars[format('OCI_CONFIG_FILE_{0}', github.event.inputs.environment)] }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets[format('OCI_KEY_FILE_{0}', github.event.inputs.environment)] }}" | tee ~/.oci/oci_api_key.pem > /dev/null
           chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
@@ -57,7 +57,7 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/helloapp/${{ github.event.inputs.environment }}.tfstate"
+        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=tf-state-${{ github.event.inputs.environment }}"
       
       - name: Terraform Plan
         id: plan
@@ -76,22 +76,22 @@ jobs:
     environment: ${{ github.event.inputs.environment }}
     env:
       TF_VAR_environment: ${{ github.event.inputs.environment }}
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_compartment_ocid: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      BACKEND_CONFIG_BUCKET: ${{ vars[format('BACKEND_CONFIG_BUCKET_{0}', github.event.inputs.environment)] }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
+
     steps:
-      
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          echo "${{ vars[format('OCI_CONFIG_FILE_{0}', github.event.inputs.environment)] }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets[format('OCI_KEY_FILE_{0}', github.event.inputs.environment)] }}" | tee ~/.oci/oci_api_key.pem > /dev/null
           chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
@@ -114,7 +114,7 @@ jobs:
             terraform-${{ runner.os }}-
       
       - name: Terraform Init
-        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=statefile/$TF_VAR_region/helloapp/${{ github.event.inputs.environment }}.tfstate"
+        run: terraform init -input=false -backend-config="bucket=$BACKEND_CONFIG_BUCKET" -backend-config="namespace=$BACKEND_CONFIG_NAMESPACE" -backend-config="key=tf-statefile-${{ github.event.inputs.environment }}"
       
       - name: Restore Plan Cache
         uses: actions/cache/restore@v4

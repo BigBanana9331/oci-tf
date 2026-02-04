@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_VAR_environment: dev
-      TF_VAR_config_file_profile: DEFAULT
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_DEV }}
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET_DEV }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
+      TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_DEV }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
 
     steps:
       - name: Checkout code
@@ -29,8 +29,8 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE_NEW }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE_DEV }}" | tee ~/.oci/oci_api_key_dev.pem > /dev/null
+          echo "${{ vars.OCI_CONFIG_FILE_UAT }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE_UAT }}" | tee ~/.oci/oci_api_key_dev.pem > /dev/null
           chmod 600 ~/.oci/config ~/.oci/oci_api_key_dev.pem
       
       - name: Setup Terraform
@@ -72,12 +72,12 @@ jobs:
     environment: dev
     env:
       TF_VAR_environment: dev
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_DEV }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: DEV
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET_DEV }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
+      TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_DEV }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
 
     steps:   
       - name: Checkout code
@@ -86,9 +86,9 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE_NEW }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key_dev.pem > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key_dev.pem
+          echo "${{ vars.OCI_CONFIG_FILE_DEV }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE_DEV }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -127,12 +127,12 @@ jobs:
     needs: [dev-apply]
     env:
       TF_VAR_environment: uat
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: UAT
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET_UAT }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
+      TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_UAT }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
 
     steps:
       - name: Checkout code
@@ -141,9 +141,9 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE_NEW }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE }}" | tee ~/.oci/oci_api_key_uat.pem > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key_uat.pem
+          echo "${{ vars.OCI_CONFIG_FILE_UAT }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE_UAT }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -184,12 +184,12 @@ jobs:
     environment: uat
     env:
       TF_VAR_environment: uat
-      TF_VAR_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID }}
-      TF_VAR_compartment_ocid: ${{ secrets.TF_VAR_COMPARTMENT_OCID_UAT }}
-      TF_VAR_region: ${{ secrets.OCI_REGION }}
-      TF_VAR_config_file_profile: UAT
-      BACKEND_CONFIG_BUCKET: ${{ secrets.BACKEND_CONFIG_BUCKET_UAT }}
-      BACKEND_CONFIG_NAMESPACE: ${{ secrets.BACKEND_CONFIG_NAMESPACE }}
+      TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
+      TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
+      TF_VAR_region: ${{ vars.OCI_REGION }}
+      BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_UAT }}
+      BACKEND_CONFIG_NAMESPACE: ${{ vars.BACKEND_CONFIG_NAMESPACE }}
 
     steps:   
       - name: Checkout code
@@ -198,9 +198,9 @@ jobs:
       - name: 'Write Config & Key Files'
         run: |
           mkdir -p ~/.oci
-          echo "${{ secrets.OCI_CONFIG_FILE_NEW }}" | tee ~/.oci/config > /dev/null
-          echo "${{ secrets.OCI_KEY_FILE_UAT }}" | tee ~/.oci/oci_api_key_uat.pem > /dev/null
-          chmod 600 ~/.oci/config ~/.oci/oci_api_key_uat.pem
+          echo "${{ vars.OCI_CONFIG_FILE_UAT }}" | tee ~/.oci/config > /dev/null
+          echo "${{ secrets.OCI_KEY_FILE_UAT }}" | tee ~/.oci/oci_api_key.pem > /dev/null
+          chmod 600 ~/.oci/config ~/.oci/oci_api_key.pem
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
