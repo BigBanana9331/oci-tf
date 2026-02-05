@@ -5,15 +5,16 @@ data "oci_identity_compartment" "compartment" {
 resource "oci_containerengine_cluster" "cluster" {
   name               = join("-", [var.environment, var.cluster_name])
   compartment_id     = var.compartment_id
-  vcn_id             = data.oci_core_vcns.vcns.virtual_networks[0].id
+  vcn_id             = var.vcn_id
   type               = var.cluster_type
   kubernetes_version = var.kubernetes_version
 
   endpoint_config {
-    subnet_id            = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.cluster_subnet_name])][0]
+    subnet_id            = var.cluster_subnet_id
     is_public_ip_enabled = var.is_public_endpoint_enabled
-    nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-    [for nsg_name in var.endpoint_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
+    nsg_ids              = var.endpoint_nsg_ids
+    # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
+    # [for nsg_name in var.endpoint_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
   }
 
   cluster_pod_network_options {
@@ -21,7 +22,7 @@ resource "oci_containerengine_cluster" "cluster" {
   }
 
   options {
-    service_lb_subnet_ids = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.loadbalancer_subnet_name])]
+    service_lb_subnet_ids = var.loadbalancer_subnet_ids
 
     kubernetes_network_config {
       pods_cidr     = var.pods_cidr
@@ -162,9 +163,12 @@ resource "oci_containerengine_addon" "ingress_controller_addon" {
     value = "workloadIdentity"
   }
 
-  configurations {
-    key   = "loadBalancerSubnetId"
-    value = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.loadbalancer_subnet_name])][0]
+  dynamic "configurations" {
+    for_each = var.loadbalancer_subnet_ids
+    content {
+      key   = "loadBalancerSubnetId"
+      value = each.value
+    }
   }
 
   depends_on = [oci_containerengine_addon.cert_manager_addon]
@@ -212,11 +216,12 @@ resource "oci_containerengine_node_pool" "node_pool" {
   node_config_details {
     size                                = each.value.node_pool_size
     is_pv_encryption_in_transit_enabled = each.value.is_pv_encryption_in_transit_enabled
-    nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-    [for nsg_name in each.value.node_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
+    nsg_ids                             = each.value.node_nsg_ids
+    # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
+    # [for nsg_name in each.value.node_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
 
     placement_configs {
-      subnet_id           = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.worker_subnet_name])][0]
+      subnet_id           = var.worker_subnet_id
       availability_domain = each.value.availability_domain
     }
 

@@ -6,11 +6,11 @@ bastion = {
   max_session_ttl_in_seconds = 3600
 }
 
-apigw = {
-  subnet_name  = "subnet-apigateway"
-  gateway_name = "api-gateway-0"
-  nsg_names    = []
-}
+# apigw = {
+#   subnet_name  = "subnet-apigateway"
+#   gateway_name = "api-gateway-0"
+#   nsg_names    = []
+# }
 
 # oke = {
 #   vcn_name                 = "vcn"

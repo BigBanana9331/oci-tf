@@ -30,12 +30,12 @@ variable "vcn_name" {
   default = "vcn"
 }
 
-variable "subnet_name" {
-  type    = string
-  default = "subnet-mysql"
+variable "subnet_id" {
+  type = string
+  # default = "subnet-mysql"
 }
 
-variable "nsg_names" {
+variable "nsg_ids" {
   type    = set(string)
   default = []
 }

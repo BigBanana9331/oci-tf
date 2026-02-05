@@ -126,9 +126,9 @@ variable "logs" {
   }
 }
 
-variable "vcn_name" {
-  type    = string
-  default = "vcn-0"
+variable "vcn_id" {
+  type = string
+  # default = "vcn-0"
 }
 
 variable "vault_name" {
@@ -179,15 +179,15 @@ variable "node_pool_os_type" {
   default = "OL8"
 }
 
-variable "cluster_subnet_name" {
-  type    = string
-  default = "subnet-oke-apiendpoint"
+variable "cluster_subnet_id" {
+  type = string
+  # default = "subnet-oke-apiendpoint"
 }
 
-variable "endpoint_nsg_names" {
+variable "endpoint_nsg_ids" {
   type     = set(string)
   nullable = true
-  default  = ["nsg-oke-apiendpoint"]
+  # default  = ["nsg-oke-apiendpoint"]
 }
 
 variable "cni_type" {
@@ -205,14 +205,14 @@ variable "is_pod_security_policy_enabled" {
   default = false
 }
 
-variable "loadbalancer_subnet_name" {
-  type    = string
-  default = "subnet-oke-serviceloadbalancer"
+variable "loadbalancer_subnet_ids" {
+  type = list(string)
+  # default = "subnet-oke-serviceloadbalancer"
 }
 
-variable "worker_subnet_name" {
-  type    = string
-  default = "subnet-oke-workernode"
+variable "worker_subnet_id" {
+  type = string
+  # default = "subnet-oke-workernode"
 }
 
 variable "services_cidr" {
@@ -231,7 +231,7 @@ variable "node_pools" {
     node_pool_size                       = number
     cni_type                             = string
     is_pv_encryption_in_transit_enabled  = optional(bool, null)
-    key_name                             = optional(string, null)
+    key_id                               = optional(string, null)
     node_metadata                        = optional(map(string))
     initial_node_labels                  = optional(map(string))
     node_shape_ocpus                     = optional(number, null)
@@ -239,7 +239,7 @@ variable "node_pools" {
     eviction_grace_duration              = optional(string, null)
     is_force_action_after_grace_duration = optional(bool, null)
     is_force_delete_after_grace_duration = optional(bool, null)
-    node_nsg_names                       = optional(set(string), [])
+    node_nsg_ids                         = optional(set(string), [])
     cycle_modes                          = optional(set(string), ["INSTANCE_REPLACE"])
     is_node_cycling_enabled              = optional(bool, false)
     maximum_surge                        = optional(number, 1)
@@ -249,25 +249,25 @@ variable "node_pools" {
     availability_domain                  = optional(string)
   }))
 
-  default = {
-    "pool-0" = {
-      node_shape                          = "VM.Standard.E5.Flex"
-      node_shape_ocpus                    = 1
-      node_shape_memory_in_gbs            = 8
-      node_pool_size                      = 1
-      cni_type                            = "FLANNEL_OVERLAY"
-      node_nsg_names                      = ["nsg-oke-workernode"]
-      is_pv_encryption_in_transit_enabled = true
+  # default = {
+  #   "pool-0" = {
+  #     node_shape                          = "VM.Standard.E5.Flex"
+  #     node_shape_ocpus                    = 1
+  #     node_shape_memory_in_gbs            = 8
+  #     node_pool_size                      = 1
+  #     cni_type                            = "FLANNEL_OVERLAY"
+  #     node_nsg_names                      = ["nsg-oke-workernode"]
+  #     is_pv_encryption_in_transit_enabled = true
 
-      node_metadata = {
-        meta = "meta1"
-      }
+  #     node_metadata = {
+  #       meta = "meta1"
+  #     }
 
-      initial_node_labels = {
-        label = "label1"
-      }
-    }
-  }
+  #     initial_node_labels = {
+  #       label = "label1"
+  #     }
+  #   }
+  # }
 }
 
 

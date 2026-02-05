@@ -40,9 +40,10 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   # admin_username          = var.admin_username
   # admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
 
-  subnet_id = [for subnet in data.oci_core_subnets.subnets.subnets : subnet.id if subnet.display_name == join("-", [var.environment, var.subnet_name])][0]
-  nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-  [for nsg_name in var.nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
+  subnet_id = var.subnet_id
+  nsg_ids   = var.nsg_ids
+  # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
+  # [for nsg_name in var.nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
 
   mysql_version       = var.mysql_version
   access_mode         = var.access_mode
