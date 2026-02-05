@@ -1,9 +1,9 @@
-# bastion = {
-#   vcn_name                   = "vcn"
-#   subnet_name                = "subnet-bastion"
-#   bastion_name               = "bastion-0"
-#   max_session_ttl_in_seconds = 3600
-# }
+bastion = {
+  vcn_name                   = "vcn"
+  subnet_name                = "subnet-bastion"
+  bastion_name               = "bastion-0"
+  max_session_ttl_in_seconds = 3600
+}
 
 # oke = {
 #   vcn_name                 = "vcn"
@@ -74,12 +74,12 @@
 #   }
 # }
 
-mysql = {
-  vcn_name                = "vcn"
-  subnet_name             = "subnet-mysql"
-  nsg_names               = []
-  shape_name              = "MySQL.2"
-  display_name            = "mysql"
-  data_storage_size_in_gb = 50
-  is_highly_available     = false
-}
+# mysql = {
+  #vcn_name                = "vcn"
+  #subnet_name             = "subnet-mysql"
+  #nsg_names               = []
+  #shape_name              = "MySQL.2"
+  #display_name            = "mysql"
+  #data_storage_size_in_gb = 50
+  #is_highly_available     = false
+#}
