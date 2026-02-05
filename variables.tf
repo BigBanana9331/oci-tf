@@ -114,6 +114,8 @@ variable "oke" {
 }
 
 variable "mysql" {
+	nullable = true
+  default  = null
   type = object({
     vcn_name                = string
     subnet_name             = string
