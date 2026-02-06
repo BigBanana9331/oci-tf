@@ -21,6 +21,15 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
+variable "policies" {
+  type = map(string)
+  default = {
+    "netpol"     = "Networking policy for OKE"
+    "secpol"     = "Security policy for OKE"
+    "computepol" = "Compute policy for OKE"
+  }
+}
+
 variable "environment" {
   type = string
 }
@@ -104,6 +113,11 @@ variable "admin_username" {
   default = "admin"
 }
 
+variable "admin_password" {
+  type      = string
+  sensitive = true
+}
+
 variable "vault_name" {
   type    = string
   default = "dev-vault"
@@ -125,6 +139,11 @@ variable "key_generation_type" {
   default = "SYSTEM" # BYOK/SYSTEM
 }
 
+variable "key_id" {
+  type     = string
+  nullable = true
+  default  = null
+}
 variable "certificate_generation_type" {
   type    = string
   default = "SYSTEM"

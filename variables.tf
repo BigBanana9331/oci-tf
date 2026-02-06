@@ -6,7 +6,30 @@ variable "tenancy_ocid" {
   type = string
 }
 
+variable "ad_number" {
+  type    = number
+  default = 1
+}
+
 variable "compartment_ocid" {
+  type = string
+}
+
+variable "vault_compartment_id" {
+  type = string
+}
+
+variable "vault_name" {
+  type    = string
+  default = "dev-vault"
+}
+
+variable "admin_password_secret_name" {
+  type    = string
+  default = "dev-mysql-admin-password"
+}
+
+variable "vcn_compartment_id" {
   type = string
 }
 
@@ -69,17 +92,16 @@ variable "oke" {
   nullable = true
   default  = null
   type = object({
-    cluster_name             = string
-    cluster_type             = string
-    kubernetes_version       = string
-    cluster_subnet_name      = string
-    endpoint_nsg_names       = set(string)
-    cni_type                 = string
-    loadbalancer_subnet_name = string
-    worker_subnet_name       = string
-    services_cidr            = string
-    pods_cidr                = string
-
+    cluster_name            = string
+    cluster_type            = string
+    kubernetes_version      = string
+    cluster_subnet_name     = string
+    endpoint_nsg_names      = set(string)
+    cni_type                = string
+    loadbalancer_subnet_ids = list(string)
+    worker_subnet_name      = string
+    services_cidr           = string
+    pods_cidr               = string
     log_group = object({
       name = string
     })

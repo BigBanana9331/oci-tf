@@ -8,10 +8,10 @@ locals {
     definedTags = {}
   }
 
-  # image_id = [
-  #   for source in data.oci_containerengine_node_pool_option.node_pool_option.sources :
-  #   source.image_id if strcontains(source.source_name, "Gen2-GPU") == false
-  # ][0]
+  image_id = [
+    for source in data.oci_containerengine_node_pool_option.node_pool_option.sources :
+    source.image_id if strcontains(source.source_name, "Gen2-GPU") == false
+  ][0]
 
   subnets = {
     for subnet in data.oci_core_subnets.subnets.subnets : subnet.display_name => subnet.id

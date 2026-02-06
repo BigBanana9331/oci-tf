@@ -1,22 +1,31 @@
-data "oci_identity_compartment" "compartment" {
-  id = var.compartment_id
+locals {
+  policies = {
+    secpol = [
+      "Allow any-user to read leaf-certificate-family in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+      "Allow any-user to use key-delegate in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+      "Allow any-user to associate keys in compartment ${var.compartment_id} with volumes in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+      "Allow any-user to associate keys in compartment ${var.compartment_id} with volume-backups in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+      "Allow any-user to associate keys in compartment ${var.compartment_id} with buckets in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+    ]
+    netpol = [
+      "Allow any-user to {NETWORK_SECURITY_GROUP_UPDATE_MEMBERS} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+      "Allow any-user to {VNIC_CREATE, VNIC_UPDATE, VNIC_ASSOCIATE_NETWORK_SECURITY_GROUP, VNIC_DISASSOCIATE_NETWORK_SECURITY_GROUP} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+      "Allow any-user to {SECURITY_ATTRIBUTE_NAMESPACE_USE, VNIC_UPDATE, VNIC_CREATE} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+    ]
+    computepol = [
+      "Allow any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+    ]
+  }
 }
 
-resource "oci_identity_policy" "policy" {
+
+resource "oci_identity_policy" "policies" {
+  for_each       = var.policies != null ? var.policies : {}
   compartment_id = var.compartment_id
-  description    = var.policy.name
-  name           = join("-", [var.environment, var.policy.name])
-  statements = [
-    "Allow any-user to use key-delegate in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-    "Allow any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in compartment ${data.oci_identity_compartment.compartment.name} where request.principal.type = 'mysqldbsystem'",
-    "Allow any-user to associate keys in compartment ${data.oci_identity_compartment.compartment.name} with volumes in compartment ${data.oci_identity_compartment.compartment.name} where request.principal.type = 'mysqldbsystem'",
-    "Allow any-user to associate keys in compartment ${data.oci_identity_compartment.compartment.name} with volume-backups in compartment ${data.oci_identity_compartment.compartment.name} where request.principal.type = 'mysqldbsystem'",
-    "Allow any-user to associate keys in compartment ${data.oci_identity_compartment.compartment.name} with buckets in compartment ${data.oci_identity_compartment.compartment.name} where request.principal.type = 'mysqldbsystem'",
-    "Allow any-user to {NETWORK_SECURITY_GROUP_UPDATE_MEMBERS} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-    "Allow any-user to {VNIC_CREATE, VNIC_UPDATE, VNIC_ASSOCIATE_NETWORK_SECURITY_GROUP, VNIC_DISASSOCIATE_NETWORK_SECURITY_GROUP} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-    "Allow any-user to {SECURITY_ATTRIBUTE_NAMESPACE_USE, VNIC_UPDATE, VNIC_CREATE} in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-    "Allow any-user to read leaf-certificate-family in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}"
-  ]
+  description    = each.value
+  name           = join("-", [var.environment, each.key])
+
+  statements = local.policies[each.key]
 
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
@@ -25,8 +34,6 @@ resource "oci_identity_policy" "policy" {
     ignore_changes = [defined_tags, freeform_tags]
   }
 }
-
-
 
 resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   compartment_id      = var.compartment_id
@@ -37,13 +44,11 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   is_highly_available     = var.is_highly_available
   shape_name              = var.shape_name
   data_storage_size_in_gb = var.data_storage_size_in_gb
-  # admin_username          = var.admin_username
-  # admin_password          = base64decode(data.oci_secrets_secretbundle.secretbundle.secret_bundle_content[0].content)
+  admin_username          = var.admin_username
+  admin_password          = var.admin_password
 
   subnet_id = var.subnet_id
   nsg_ids   = var.nsg_ids
-  # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-  # [for nsg_name in var.nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
 
   mysql_version       = var.mysql_version
   access_mode         = var.access_mode
@@ -55,13 +60,13 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   ip_address          = var.ip_address
   hostname_label      = join("-", [var.environment, var.hostname_label])
 
-  # dynamic "encrypt_data" {
-  #   for_each = var.key_generation_type != null ? [1] : []
-  #   content {
-  #     key_generation_type = var.key_generation_type
-  #     key_id              = [for key in data.oci_kms_keys.keys.keys : key.id if key.display_name == var.key_name][0]
-  #   }
-  # }
+  dynamic "encrypt_data" {
+    for_each = var.key_generation_type != null ? [1] : []
+    content {
+      key_generation_type = var.key_generation_type
+      key_id              = var.key_generation_type == "BOYK" ? var.key_id : null
+    }
+  }
 
   dynamic "secure_connections" {
     for_each = var.certificate_generation_type != null ? [1] : []
@@ -82,6 +87,8 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   dynamic "backup_policy" {
     for_each = var.backup_policy != null ? [1] : []
     content {
+      defined_tags      = var.tags.definedTags
+      freeform_tags     = var.tags.freeformTags
       is_enabled        = var.backup_policy.is_enabled
       retention_in_days = var.backup_policy.retention_in_days
       window_start_time = var.backup_policy.window_start_time
@@ -132,10 +139,10 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   dynamic "maintenance" {
     for_each = var.maintenance != null ? [1] : []
     content {
-      window_start_time = var.maintenance.window_start_time
-      # maintenance_schedule_type = var.maintenance.maintenance_schedule_type
-      # version_preference        = var.maintenance.version_preference
-      # version_track_preference  = var.maintenance.version_track_preference
+      window_start_time         = var.maintenance.window_start_time
+      maintenance_schedule_type = var.maintenance.maintenance_schedule_type
+      version_preference        = var.maintenance.version_preference
+      version_track_preference  = var.maintenance.version_track_preference
     }
   }
 
@@ -146,5 +153,5 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
     ignore_changes = [defined_tags, freeform_tags]
   }
 
-  depends_on = [oci_identity_policy.policy]
+  depends_on = [oci_identity_policy.policies]
 }
