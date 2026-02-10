@@ -130,7 +130,7 @@ variable "admin_password" {
 
 variable "key_generation_type" {
   type    = string
-  default = "BOYK" # BYOK/SYSTEM
+  default = "BYOK" # BYOK/SYSTEM
 }
 
 variable "kms_key_id" {
