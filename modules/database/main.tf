@@ -58,7 +58,8 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   port                = var.port
   port_x              = var.port_x
   ip_address          = var.ip_address
-  hostname_label      = join("-", [var.environment, var.hostname_label])
+  # hostname_label      = join("-", [var.environment, var.hostname_label])
+  hostname_label      = join("-", [var.environment, var.display_name])
 
   dynamic "encrypt_data" {
     for_each = var.key_generation_type != null ? [1] : []

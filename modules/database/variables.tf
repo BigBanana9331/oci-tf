@@ -41,7 +41,6 @@ variable "vcn_name" {
 
 variable "subnet_id" {
   type = string
-  # default = "subnet-mysql"
 }
 
 variable "nsg_ids" {
@@ -97,10 +96,10 @@ variable "port_x" {
   default = 33060
 }
 
-variable "hostname_label" {
-  type    = string
-  default = "mysql"
-}
+# variable "hostname_label" {
+#   type    = string
+#   default = "mysql"
+# }
 
 variable "ip_address" {
   type     = string
@@ -128,15 +127,15 @@ variable "admin_password_secret_name" {
   default = "dev-mysql-admin-password"
 }
 
-variable "key_name" {
-  type     = string
-  nullable = true
-  default  = "encryption-key"
-}
+# variable "key_name" {
+#   type     = string
+#   nullable = true
+#   default  = "encryption-key"
+# }
 
 variable "key_generation_type" {
   type    = string
-  default = "SYSTEM" # BYOK/SYSTEM
+  default = "BOYK" # BYOK/SYSTEM
 }
 
 variable "key_id" {
@@ -144,6 +143,7 @@ variable "key_id" {
   nullable = true
   default  = null
 }
+
 variable "certificate_generation_type" {
   type    = string
   default = "SYSTEM"
