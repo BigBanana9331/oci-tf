@@ -40,7 +40,7 @@ module "oke" {
   pods_cidr               = var.oke.pods_cidr
   kms_key_id              = local.keys[var.oke.kms_key_name]
   node_pools              = var.oke.node_pools
-  dynamic_group_ids       = [data.oci_identity_dynamic_groups.dynamic_groups.id]
+  dynamic_group_ids       = [data.oci_identity_dynamic_groups.dynamic_groups.dynamic_groups[0].id]
   autoscaler              = var.oke.autoscaler
 }
 

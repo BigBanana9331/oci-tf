@@ -13,7 +13,7 @@ variable "ad_number" {
 
 variable "dynamic_group_name" {
   type    = string
-  default = ""
+  default = "nodes-dg"
 }
 
 variable "compartment_ocid" {
