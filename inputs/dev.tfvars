@@ -89,4 +89,5 @@ mysql = {
   display_name            = "mysql"
   data_storage_size_in_gb = 50
   is_highly_available     = false
+  key_name                = "encryption-key"
 }

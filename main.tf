@@ -60,4 +60,5 @@ module "mysql" {
   data_storage_size_in_gb = var.mysql.data_storage_size_in_gb
   is_highly_available     = var.mysql.is_highly_available
   admin_password          = base64decode(data.oci_secrets_secretbundle.admin_password_secretbundle.secret_bundle_content[0].content)
+  key_id                  = data.oci_kms_keys.keys[var.mysql.key_name]
 }

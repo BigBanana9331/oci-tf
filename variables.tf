@@ -178,5 +178,6 @@ variable "mysql" {
     display_name            = string
     data_storage_size_in_gb = number
     is_highly_available     = bool
+    key_name                = string
   })
 }
