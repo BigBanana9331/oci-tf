@@ -30,7 +30,7 @@ module "oke" {
   kubernetes_version      = element(data.oci_containerengine_node_pool_option.node_pool_option.kubernetes_versions, -1)
   image_id                = local.image_id
   vcn_id                  = data.oci_core_vcns.vcns.virtual_networks[0].id
-  availability_domain     = data.oci_identity_availability_domain.ad.name
+  availability_domain     = data.oci_identity_availability_domain.ad.id
   cluster_subnet_id       = var.oke.cluster_subnet_name
   endpoint_nsg_ids        = var.oke.endpoint_nsg_names
   loadbalancer_subnet_ids = [for subnet in var.oke.loadbalancer_subnet_names : lookup(local.subnets, join("-", [var.environment, subnet]))]

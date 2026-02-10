@@ -292,8 +292,8 @@ resource "oci_containerengine_node_pool" "node_pool" {
   node_config_details {
     size                                = each.value.node_pool_size
     is_pv_encryption_in_transit_enabled = each.value.is_pv_encryption_in_transit_enabled
-    kms_key_id                          = var.kms_key_id
-    nsg_ids                             = each.value.node_nsg_ids
+    # kms_key_id                          = var.kms_key_id
+    nsg_ids = each.value.node_nsg_ids
 
     placement_configs {
       subnet_id           = var.worker_subnet_id
