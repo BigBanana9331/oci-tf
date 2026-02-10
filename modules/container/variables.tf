@@ -27,6 +27,93 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
+variable "cluster_name" {
+  type    = string
+  default = "oke-0"
+}
+
+variable "cluster_type" {
+  type    = string
+  default = "ENHANCED_CLUSTER"
+}
+
+variable "kubernetes_version" {
+  type    = string
+  default = "v1.34.1"
+}
+
+variable "vcn_id" {
+  type = string
+}
+
+variable "cluster_subnet_id" {
+  type = string
+}
+
+variable "endpoint_nsg_ids" {
+  type     = set(string)
+  nullable = true
+}
+
+variable "backend_nsg_ids" {
+  type     = list(string)
+  nullable = true
+  default  = null
+}
+
+variable "cni_type" {
+  type    = string
+  default = "FLANNEL_OVERLAY"
+}
+
+variable "is_public_endpoint_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "loadbalancer_subnet_ids" {
+  type = list(string)
+}
+
+variable "worker_subnet_id" {
+  type = string
+}
+
+variable "services_cidr" {
+  type    = string
+  default = "10.96.0.0/16"
+}
+
+variable "pods_cidr" {
+  type    = string
+  default = "10.244.0.0/16"
+}
+
+variable "is_pod_security_policy_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "kms_key_id" {
+  nullable    = true
+  default     = null
+  type        = string
+  description = "Encryption Key OCID"
+}
+
+variable "image_policy_config" {
+  nullable = true
+  default  = null
+  type = object({
+    is_policy_enabled = bool
+    key_ids           = list(string)
+  })
+  # validation {
+  #   condition     = var.image_policy_config != null && var.image_policy_config.is_policy_enabled == false && length(var.image_policy_config.key_ids) == 0
+  #   error_message = "Key is required when enable image policy"
+  # }
+}
+
 variable "log_group" {
   type = object({
     name        = string
@@ -89,19 +176,6 @@ variable "unified_agent_configuration" {
   }
 }
 
-variable "autoscaler" {
-  type = object({
-    is_enabled = optional(bool, true)
-    min_node   = optional(number, 1)
-    max_node   = optional(number, 2)
-  })
-  default = {
-    is_enabled = true
-    min_node   = 1
-    max_node   = 2
-  }
-}
-
 variable "logs" {
   type = map(object({
     is_enabled         = optional(bool, true)
@@ -126,103 +200,13 @@ variable "logs" {
   }
 }
 
-variable "vcn_id" {
-  type = string
-  # default = "vcn-0"
-}
-
-variable "vault_name" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "key_name" {
-  type     = string
-  default  = null
-  nullable = true
-}
-
-variable "ssh_secret_name" {
-  type     = string
-  nullable = true
-  default  = null
-}
-
-variable "cluster_name" {
-  type    = string
-  default = "oke-0"
-}
-
-variable "cluster_type" {
-  type    = string
-  default = "ENHANCED_CLUSTER"
-}
-
-variable "kubernetes_version" {
-  type    = string
-  default = "v1.34.1"
-}
-
-variable "node_pool_option_id" {
-  type    = string
-  default = "all"
-}
-
-variable "node_pool_os_arch" {
-  type    = string
-  default = "X86_64"
-}
-
-variable "node_pool_os_type" {
-  type    = string
-  default = "OL8"
-}
-
-variable "cluster_subnet_id" {
-  type = string
-  # default = "subnet-oke-apiendpoint"
-}
-
-variable "endpoint_nsg_ids" {
-  type     = set(string)
-  nullable = true
-  # default  = ["nsg-oke-apiendpoint"]
-}
-
-variable "cni_type" {
-  type    = string
-  default = "FLANNEL_OVERLAY"
-}
-
-variable "is_public_endpoint_enabled" {
-  type    = bool
-  default = false
-}
-
-variable "is_pod_security_policy_enabled" {
-  type    = bool
-  default = false
-}
-
-variable "loadbalancer_subnet_ids" {
-  type = list(string)
-  # default = "subnet-oke-serviceloadbalancer"
-}
-
-variable "worker_subnet_id" {
-  type = string
-  # default = "subnet-oke-workernode"
-}
-
-variable "services_cidr" {
-  type    = string
-  default = "10.96.0.0/16"
-}
-
-variable "pods_cidr" {
-  type    = string
-  default = "10.244.0.0/16"
+variable "policies" {
+  type = map(string)
+  default = {
+    "netpol"     = "Networking policy for OKE"
+    "secpol"     = "Security policy for OKE"
+    "computepol" = "Compute policy for OKE"
+  }
 }
 
 variable "node_pools" {
@@ -230,15 +214,15 @@ variable "node_pools" {
     node_shape                           = string
     node_pool_size                       = number
     cni_type                             = string
-    is_pv_encryption_in_transit_enabled  = optional(bool, null)
-    key_id                               = optional(string, null)
+    is_pv_encryption_in_transit_enabled  = optional(bool)
+    key_id                               = optional(string)
     node_metadata                        = optional(map(string))
     initial_node_labels                  = optional(map(string))
-    node_shape_ocpus                     = optional(number, null)
-    node_shape_memory_in_gbs             = optional(number, null)
-    eviction_grace_duration              = optional(string, null)
-    is_force_action_after_grace_duration = optional(bool, null)
-    is_force_delete_after_grace_duration = optional(bool, null)
+    node_shape_ocpus                     = optional(number)
+    node_shape_memory_in_gbs             = optional(number)
+    eviction_grace_duration              = optional(string)
+    is_force_action_after_grace_duration = optional(bool)
+    is_force_delete_after_grace_duration = optional(bool)
     node_nsg_ids                         = optional(set(string), [])
     cycle_modes                          = optional(set(string), ["INSTANCE_REPLACE"])
     is_node_cycling_enabled              = optional(bool, false)
@@ -246,28 +230,22 @@ variable "node_pools" {
     maximum_unavailable                  = optional(number, 1)
     image_id                             = optional(string)
     source_type                          = optional(string, "IMAGE")
+    boot_volume_size_in_gbs              = optional(number, 50)
     availability_domain                  = optional(string)
   }))
+}
 
-  # default = {
-  #   "pool-0" = {
-  #     node_shape                          = "VM.Standard.E5.Flex"
-  #     node_shape_ocpus                    = 1
-  #     node_shape_memory_in_gbs            = 8
-  #     node_pool_size                      = 1
-  #     cni_type                            = "FLANNEL_OVERLAY"
-  #     node_nsg_names                      = ["nsg-oke-workernode"]
-  #     is_pv_encryption_in_transit_enabled = true
-
-  #     node_metadata = {
-  #       meta = "meta1"
-  #     }
-
-  #     initial_node_labels = {
-  #       label = "label1"
-  #     }
-  #   }
-  # }
+variable "autoscaler" {
+  type = object({
+    is_enabled = optional(bool, true)
+    min_node   = optional(number, 1)
+    max_node   = optional(number, 2)
+  })
+  default = {
+    is_enabled = true
+    min_node   = 1
+    max_node   = 2
+  }
 }
 
 

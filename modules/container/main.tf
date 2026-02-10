@@ -1,5 +1,35 @@
-data "oci_identity_compartment" "compartment" {
-  id = var.compartment_id
+locals {
+  policies = {
+    secpol = [
+      "Allow any-user to manage cabundles in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage cabundle-associations in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage leaf-certificates in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to read leaf-certificate-bundles in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage leaf-certificate-versions in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage certificate-associations in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to read certificate-authorities in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage certificate-authority-associations in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to read certificate-authority-bundles in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+    ]
+    netpol = [
+      "Allow any-user to use subnets in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to read virtual-network-family in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to use vnics in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage load-balancers in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to use virtual-network-family in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to read public-ips in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage floating-ips in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage waf-family in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+    ]
+    computepol = [
+      "Allow any-user to read cluster-family in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to use tag-namespaces in compartment ${var.compartment_id} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage cluster-node-pools in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to manage instance-family in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow any-user to inspect compartments in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+      "Allow dynamic-group dev-nodes-dg to use log-content in compartment ${var.compartment_id}"
+    ]
+  }
 }
 
 resource "oci_containerengine_cluster" "cluster" {
@@ -8,13 +38,25 @@ resource "oci_containerengine_cluster" "cluster" {
   vcn_id             = var.vcn_id
   type               = var.cluster_type
   kubernetes_version = var.kubernetes_version
+  kms_key_id         = var.kms_key_id
+
+  dynamic "image_policy_config" {
+    for_each = var.image_policy_config != null ? [1] : []
+    content {
+      is_policy_enabled = image_policy_config.value.is_policy_enabled
+      dynamic "key_details" {
+        for_each = image_policy_config.value.key_ids != null ? image_policy_config.value.key_ids : []
+        content {
+          kms_key_id = key_details.value
+        }
+      }
+    }
+  }
 
   endpoint_config {
     subnet_id            = var.cluster_subnet_id
     is_public_ip_enabled = var.is_public_endpoint_enabled
     nsg_ids              = var.endpoint_nsg_ids
-    # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-    # [for nsg_name in var.endpoint_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
   }
 
   cluster_pod_network_options {
@@ -32,7 +74,51 @@ resource "oci_containerengine_cluster" "cluster" {
     admission_controller_options {
       is_pod_security_policy_enabled = var.is_pod_security_policy_enabled
     }
+
+    persistent_volume_config {
+      defined_tags  = var.tags.definedTags
+      freeform_tags = var.tags.freeformTags
+    }
+
+    service_lb_config {
+      backend_nsg_ids = var.backend_nsg_ids
+      defined_tags    = var.tags.definedTags
+      freeform_tags   = var.tags.freeformTags
+    }
   }
+
+
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
+}
+
+resource "oci_identity_policy" "policies" {
+  for_each       = var.policies != null ? var.policies : {}
+  compartment_id = var.compartment_id
+  description    = each.value
+  name           = join("-", [var.environment, each.key])
+
+  statements = local.policies[each.key]
+
+  defined_tags  = var.tags.definedTags
+  freeform_tags = var.tags.freeformTags
+
+  lifecycle {
+    ignore_changes = [defined_tags, freeform_tags]
+  }
+
+  depends_on = [oci_containerengine_cluster.cluster]
+}
+
+resource "oci_identity_dynamic_group" "dynamic_group" {
+  compartment_id = var.compartment_id
+  description    = var.instance_dynamic_group.description
+  matching_rule  = "ANY {instance.compartment.id = '${var.compartment_id}'}"
+  name           = join("-", [var.environment, var.instance_dynamic_group.name])
 
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
@@ -87,11 +173,31 @@ resource "oci_logging_log" "logs" {
   depends_on = [oci_containerengine_cluster.cluster, oci_logging_log_group.log_group]
 }
 
-resource "oci_identity_dynamic_group" "dynamic_group" {
+resource "oci_logging_unified_agent_configuration" "unified_agent_configuration" {
   compartment_id = var.compartment_id
-  description    = var.instance_dynamic_group.description
-  matching_rule  = "ANY {instance.compartment.id = '${var.compartment_id}'}"
-  name           = join("-", [var.environment, var.instance_dynamic_group.name])
+  description    = var.unified_agent_configuration.description
+  display_name   = join("-", [var.environment, var.unified_agent_configuration.name])
+  is_enabled     = var.unified_agent_configuration.is_enabled
+
+  service_configuration {
+    configuration_type = var.unified_agent_configuration.configuration_type
+    destination {
+      log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == join("-", [var.environment, var.unified_agent_configuration.log_object_name])][0]
+    }
+
+    sources {
+      name        = join("-", [var.environment, var.unified_agent_configuration.source.name])
+      source_type = var.unified_agent_configuration.source.source_type
+      paths       = var.unified_agent_configuration.source.paths
+      parser {
+        parser_type = var.unified_agent_configuration.source.parser_type
+      }
+    }
+  }
+
+  group_association {
+    group_list = [oci_identity_dynamic_group.dynamic_group.id]
+  }
 
   defined_tags  = var.tags.definedTags
   freeform_tags = var.tags.freeformTags
@@ -99,47 +205,6 @@ resource "oci_identity_dynamic_group" "dynamic_group" {
   lifecycle {
     ignore_changes = [defined_tags, freeform_tags]
   }
-}
-
-resource "oci_identity_policy" "policy" {
-  compartment_id = var.compartment_id
-  description    = var.policy.description
-  name           = join("-", [var.environment, var.policy.name])
-
-  statements = [
-    "Allow any-user to manage load-balancers in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to use virtual-network-family in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage cabundles in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage cabundle-associations in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage leaf-certificates in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read leaf-certificate-bundles in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage leaf-certificate-versions in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage certificate-associations in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read certificate-authorities in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage certificate-authority-associations in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read certificate-authority-bundles in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read public-ips in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage floating-ips in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage waf-family in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read cluster-family in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to use tag-namespaces in compartment ${data.oci_identity_compartment.compartment.name} where all {request.principal.type = 'workload', request.principal.namespace = 'native-ingress-controller-system', request.principal.service_account = 'oci-native-ingress-controller', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage cluster-node-pools in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to manage instance-family in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to use subnets in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to read virtual-network-family in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to use vnics in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow any-user to inspect compartments in compartment ${data.oci_identity_compartment.compartment.name} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
-    "Allow dynamic-group dev-nodes-dg to use log-content in compartment ${data.oci_identity_compartment.compartment.name}" # managed nodes log
-  ]
-
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
-
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-
-  depends_on = [oci_containerengine_cluster.cluster]
 }
 
 resource "oci_containerengine_addon" "cert_manager_addon" {
@@ -147,6 +212,15 @@ resource "oci_containerengine_addon" "cert_manager_addon" {
   cluster_id                       = oci_containerengine_cluster.cluster.id
   remove_addon_resources_on_delete = true
 }
+
+resource "oci_containerengine_addon" "metric_server_addon" {
+  addon_name                       = "KubernetesMetricsServer"
+  cluster_id                       = oci_containerengine_cluster.cluster.id
+  remove_addon_resources_on_delete = true
+
+  depends_on = [oci_containerengine_addon.cert_manager_addon]
+}
+
 
 resource "oci_containerengine_addon" "ingress_controller_addon" {
   addon_name                       = "NativeIngressController"
@@ -217,8 +291,6 @@ resource "oci_containerengine_node_pool" "node_pool" {
     size                                = each.value.node_pool_size
     is_pv_encryption_in_transit_enabled = each.value.is_pv_encryption_in_transit_enabled
     nsg_ids                             = each.value.node_nsg_ids
-    # nsg_ids = flatten([for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups :
-    # [for nsg_name in each.value.node_nsg_names : nsg.id if nsg.display_name == join("-", [var.environment, nsg_name])]])
 
     placement_configs {
       subnet_id           = var.worker_subnet_id
@@ -234,8 +306,9 @@ resource "oci_containerengine_node_pool" "node_pool" {
   }
 
   node_source_details {
-    image_id    = each.value.image_id
-    source_type = each.value.source_type
+    boot_volume_size_in_gbs = each.value.boot_volume_size_in_gbs
+    image_id                = each.value.image_id
+    source_type             = each.value.source_type
   }
 
   defined_tags  = var.tags.definedTags
@@ -249,48 +322,6 @@ resource "oci_containerengine_node_pool" "node_pool" {
       node_config_details[0].freeform_tags,
     ]
   }
-}
-
-resource "oci_logging_unified_agent_configuration" "unified_agent_configuration" {
-  compartment_id = var.compartment_id
-  description    = var.unified_agent_configuration.description
-  display_name   = join("-", [var.environment, var.unified_agent_configuration.name])
-  is_enabled     = var.unified_agent_configuration.is_enabled
-
-  service_configuration {
-    configuration_type = var.unified_agent_configuration.configuration_type
-    destination {
-      log_object_id = [for log in oci_logging_log.logs : log.id if log.display_name == join("-", [var.environment, var.unified_agent_configuration.log_object_name])][0]
-    }
-
-    sources {
-      name        = join("-", [var.environment, var.unified_agent_configuration.source.name])
-      source_type = var.unified_agent_configuration.source.source_type
-      paths       = var.unified_agent_configuration.source.paths
-      parser {
-        parser_type = var.unified_agent_configuration.source.parser_type
-      }
-    }
-  }
-
-  group_association {
-    group_list = [oci_identity_dynamic_group.dynamic_group.id]
-  }
-
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
-
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-}
-
-resource "oci_containerengine_addon" "metric_server_addon" {
-  addon_name                       = "KubernetesMetricsServer"
-  cluster_id                       = oci_containerengine_cluster.cluster.id
-  remove_addon_resources_on_delete = true
-
-  depends_on = [oci_containerengine_addon.cert_manager_addon]
 }
 
 resource "oci_containerengine_addon" "auto_scaler_addon" {

@@ -21,6 +21,15 @@ variable "tags" {
   default = { "definedTags" = {}, "freeformTags" = { "CreatedBy" = "Terraform" } }
 }
 
+variable "policies" {
+  type = map(string)
+  default = {
+    "netpol"     = "Networking policy for OKE"
+    "secpol"     = "Security policy for OKE"
+    "computepol" = "Compute policy for OKE"
+  }
+}
+
 variable "environment" {
   type = string
 }
@@ -32,7 +41,6 @@ variable "vcn_name" {
 
 variable "subnet_id" {
   type = string
-  # default = "subnet-mysql"
 }
 
 variable "nsg_ids" {
@@ -88,10 +96,10 @@ variable "port_x" {
   default = 33060
 }
 
-variable "hostname_label" {
-  type    = string
-  default = "mysql"
-}
+# variable "hostname_label" {
+#   type    = string
+#   default = "mysql"
+# }
 
 variable "ip_address" {
   type     = string
@@ -104,6 +112,11 @@ variable "admin_username" {
   default = "admin"
 }
 
+variable "admin_password" {
+  type      = string
+  sensitive = true
+}
+
 variable "vault_name" {
   type    = string
   default = "dev-vault"
@@ -114,15 +127,21 @@ variable "admin_password_secret_name" {
   default = "dev-mysql-admin-password"
 }
 
-variable "key_name" {
-  type     = string
-  nullable = true
-  default  = "encryption-key"
-}
+# variable "key_name" {
+#   type     = string
+#   nullable = true
+#   default  = "encryption-key"
+# }
 
 variable "key_generation_type" {
   type    = string
-  default = "SYSTEM" # BYOK/SYSTEM
+  default = "BOYK" # BYOK/SYSTEM
+}
+
+variable "key_id" {
+  type     = string
+  nullable = true
+  default  = null
 }
 
 variable "certificate_generation_type" {
