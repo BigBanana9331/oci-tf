@@ -94,7 +94,6 @@ variable "oke" {
   type = object({
     cluster_name              = string
     cluster_type              = string
-    kubernetes_version        = string
     cluster_subnet_name       = string
     endpoint_nsg_names        = set(string)
     cni_type                  = string
@@ -121,7 +120,6 @@ variable "oke" {
       is_node_cycling_enabled              = optional(bool, false)
       maximum_surge                        = optional(number, 1)
       maximum_unavailable                  = optional(number, 1)
-      image_id                             = optional(string, "ocid1.image.oc1.ap-singapore-1.aaaaaaaa2a3rqme4763azdnhuj47wft43q5o236g7jbglkfhogprk44o2bta")
       source_type                          = optional(string, "IMAGE")
     }))
 

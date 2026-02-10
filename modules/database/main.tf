@@ -65,7 +65,7 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
     for_each = var.key_generation_type != null ? [1] : []
     content {
       key_generation_type = var.key_generation_type
-      key_id              = var.key_generation_type == "BOYK" ? var.key_id : null
+      key_id              = var.key_generation_type == "BOYK" ? var.kms_key_id : null
     }
   }
 

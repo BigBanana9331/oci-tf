@@ -38,8 +38,11 @@ variable "cluster_type" {
 }
 
 variable "kubernetes_version" {
-  type    = string
-  default = "v1.34.1"
+  type = string
+}
+
+variable "image_id" {
+
 }
 
 variable "vcn_id" {
@@ -76,6 +79,10 @@ variable "loadbalancer_subnet_ids" {
 }
 
 variable "worker_subnet_id" {
+  type = string
+}
+
+variable "availability_domain" {
   type = string
 }
 
@@ -225,10 +232,8 @@ variable "node_pools" {
     is_node_cycling_enabled              = optional(bool, false)
     maximum_surge                        = optional(number, 1)
     maximum_unavailable                  = optional(number, 1)
-    image_id                             = optional(string)
     source_type                          = optional(string, "IMAGE")
     boot_volume_size_in_gbs              = optional(number, 50)
-    availability_domain                  = optional(string)
   }))
 }
 

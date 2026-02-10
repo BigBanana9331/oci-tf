@@ -19,10 +19,9 @@ data "oci_core_network_security_groups" "network_security_groups" {
 }
 
 data "oci_containerengine_node_pool_option" "node_pool_option" {
-  node_pool_option_id   = var.node_pool_option_id
-  node_pool_k8s_version = var.node_pool_k8s_version
-  node_pool_os_arch     = var.node_pool_os_arch
-  node_pool_os_type     = var.node_pool_os_type
+  node_pool_option_id = var.node_pool_option_id
+  node_pool_os_arch   = var.node_pool_os_arch
+  node_pool_os_type   = var.node_pool_os_type
 }
 
 data "oci_kms_vaults" "vaults" {

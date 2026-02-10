@@ -240,10 +240,10 @@ resource "oci_containerengine_addon" "ingress_controller_addon" {
   }
 
   dynamic "configurations" {
-    for_each = var.loadbalancer_subnet_ids
+    for_each = var.loadbalancer_subnet_ids != null ? var.loadbalancer_subnet_ids : []
     content {
       key   = "loadBalancerSubnetId"
-      value = each.value
+      value = configurations.value
     }
   }
 
@@ -297,7 +297,7 @@ resource "oci_containerengine_node_pool" "node_pool" {
 
     placement_configs {
       subnet_id           = var.worker_subnet_id
-      availability_domain = each.value.availability_domain
+      availability_domain = var.availability_domain
     }
 
     node_pool_pod_network_option_details {
@@ -310,7 +310,7 @@ resource "oci_containerengine_node_pool" "node_pool" {
 
   node_source_details {
     boot_volume_size_in_gbs = each.value.boot_volume_size_in_gbs
-    image_id                = each.value.image_id
+    image_id                = var.image_id
     source_type             = each.value.source_type
   }
 
