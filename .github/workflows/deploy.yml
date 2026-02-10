@@ -17,6 +17,8 @@ jobs:
       TF_VAR_environment: dev
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_DEV }}
@@ -74,6 +76,8 @@ jobs:
       TF_VAR_environment: dev
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_DEV }}
+      TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_DEV }}
@@ -129,6 +133,8 @@ jobs:
       TF_VAR_environment: uat
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_UAT }}
@@ -186,6 +192,8 @@ jobs:
       TF_VAR_environment: uat
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
       TF_VAR_compartment_ocid: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       BACKEND_CONFIG_BUCKET: ${{ vars.BACKEND_CONFIG_BUCKET_UAT }}

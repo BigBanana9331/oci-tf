@@ -108,10 +108,6 @@ variable "image_policy_config" {
     is_policy_enabled = bool
     key_ids           = list(string)
   })
-  # validation {
-  #   condition     = var.image_policy_config != null && var.image_policy_config.is_policy_enabled == false && length(var.image_policy_config.key_ids) == 0
-  #   error_message = "Key is required when enable image policy"
-  # }
 }
 
 variable "log_group" {
@@ -136,16 +132,16 @@ variable "instance_dynamic_group" {
   }
 }
 
-variable "policy" {
-  type = object({
-    description = optional(string, "policy created by terraform")
-    name        = optional(string, "oke-policy")
-  })
-  default = {
-    description = "policy created by terraform"
-    name        = "oke-policy"
-  }
-}
+# variable "policy" {
+#   type = object({
+#     description = optional(string, "policy created by terraform")
+#     name        = optional(string, "oke-policy")
+#   })
+#   default = {
+#     description = "policy created by terraform"
+#     name        = "oke-policy"
+#   }
+# }
 
 variable "unified_agent_configuration" {
   type = object({
@@ -203,9 +199,10 @@ variable "logs" {
 variable "policies" {
   type = map(string)
   default = {
-    "netpol"     = "Networking policy for OKE"
-    "secpol"     = "Security policy for OKE"
-    "computepol" = "Compute policy for OKE"
+    # "netpol"     = "Networking policy for OKE"
+    # "secpol"     = "Security policy for OKE"
+    # "computepol" = "Compute policy for OKE"
+    logpol = "Policy for instances node group logging"
   }
 }
 
@@ -215,7 +212,7 @@ variable "node_pools" {
     node_pool_size                       = number
     cni_type                             = string
     is_pv_encryption_in_transit_enabled  = optional(bool)
-    key_id                               = optional(string)
+    kms_key_id                           = optional(string)
     node_metadata                        = optional(map(string))
     initial_node_labels                  = optional(map(string))
     node_shape_ocpus                     = optional(number)

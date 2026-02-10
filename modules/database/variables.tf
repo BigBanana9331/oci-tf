@@ -24,9 +24,10 @@ variable "tags" {
 variable "policies" {
   type = map(string)
   default = {
-    "netpol"     = "Networking policy for OKE"
-    "secpol"     = "Security policy for OKE"
-    "computepol" = "Compute policy for OKE"
+    # "netpol"     = "Networking policy for OKE"
+    # "secpol"     = "Security policy for OKE"
+    # "computepol" = "Compute policy for OKE"
+    logpol = "Policy for instances node group logging"
   }
 }
 
@@ -117,20 +118,14 @@ variable "admin_password" {
   sensitive = true
 }
 
-variable "vault_name" {
-  type    = string
-  default = "dev-vault"
-}
+# variable "vault_name" {
+#   type    = string
+#   default = "dev-vault"
+# }
 
-variable "admin_password_secret_name" {
-  type    = string
-  default = "dev-mysql-admin-password"
-}
-
-# variable "key_name" {
-#   type     = string
-#   nullable = true
-#   default  = "encryption-key"
+# variable "admin_password_secret_name" {
+#   type    = string
+#   default = "dev-mysql-admin-password"
 # }
 
 variable "key_generation_type" {

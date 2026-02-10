@@ -27,6 +27,8 @@ locals {
       "Allow any-user to manage cluster-node-pools in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
       "Allow any-user to manage instance-family in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
       "Allow any-user to inspect compartments in compartment ${var.compartment_id} where ALL {request.principal.type='workload', request.principal.namespace ='kube-system', request.principal.service_account = 'cluster-autoscaler', request.principal.cluster_id = '${oci_containerengine_cluster.cluster.id}'}",
+    ]
+    logpol = [
       "Allow dynamic-group dev-nodes-dg to use log-content in compartment ${var.compartment_id}"
     ]
   }
@@ -290,6 +292,7 @@ resource "oci_containerengine_node_pool" "node_pool" {
   node_config_details {
     size                                = each.value.node_pool_size
     is_pv_encryption_in_transit_enabled = each.value.is_pv_encryption_in_transit_enabled
+    kms_key_id                          = var.kms_key_id
     nsg_ids                             = each.value.node_nsg_ids
 
     placement_configs {

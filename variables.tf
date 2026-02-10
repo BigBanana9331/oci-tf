@@ -102,42 +102,7 @@ variable "oke" {
     worker_subnet_name      = string
     services_cidr           = string
     pods_cidr               = string
-    log_group = object({
-      name = string
-    })
-
-    instance_dynamic_group = object({
-      name        = string
-      description = string
-    })
-
-    policy = object({
-      name = string
-    })
-    unified_agent_configuration = object({
-      name               = string
-      is_enabled         = bool
-      configuration_type = string
-      log_object_name    = string
-      source = object({
-        name        = string
-        source_type = string
-        paths       = list(string)
-        parser_type = string
-      })
-    })
-
-    logs = map(object({
-      is_enabled         = optional(bool, true)
-      retention_duration = optional(number, 30)
-      type               = optional(string, "CUSTOM")
-      source_type        = optional(string)
-      service            = optional(string)
-      resource           = optional(string)
-      category           = optional(string)
-      parameters         = optional(map(string))
-    }))
-
+    kms_key_name              = string
     node_pools = map(object({
       node_shape                           = string
       node_pool_size                       = number
@@ -178,5 +143,6 @@ variable "mysql" {
     display_name            = string
     data_storage_size_in_gb = number
     is_highly_available     = bool
+    key_name                = string
   })
 }

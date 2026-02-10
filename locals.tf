@@ -20,4 +20,7 @@ locals {
   nsgs = {
     for nsg in data.oci_core_network_security_groups.network_security_groups.network_security_groups : nsg.display_name => nsg.id
   }
+  keys = {
+    for key in data.oci_kms_keys.keys.keys : key.display_name => key.id
+  }
 }

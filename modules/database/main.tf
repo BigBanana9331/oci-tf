@@ -1,39 +1,39 @@
-locals {
-  policies = {
-    secpol = [
-      "Allow any-user to read leaf-certificate-family in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-      "Allow any-user to use key-delegate in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-      "Allow any-user to associate keys in compartment ${var.compartment_id} with volumes in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
-      "Allow any-user to associate keys in compartment ${var.compartment_id} with volume-backups in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
-      "Allow any-user to associate keys in compartment ${var.compartment_id} with buckets in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
-    ]
-    netpol = [
-      "Allow any-user to {NETWORK_SECURITY_GROUP_UPDATE_MEMBERS} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-      "Allow any-user to {VNIC_CREATE, VNIC_UPDATE, VNIC_ASSOCIATE_NETWORK_SECURITY_GROUP, VNIC_DISASSOCIATE_NETWORK_SECURITY_GROUP} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-      "Allow any-user to {SECURITY_ATTRIBUTE_NAMESPACE_USE, VNIC_UPDATE, VNIC_CREATE} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
-    ]
-    computepol = [
-      "Allow any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
-    ]
-  }
-}
+# locals {
+#   policies = {
+#     secpol = [
+#       "Allow any-user to read leaf-certificate-family in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+#       "Allow any-user to use key-delegate in compartment ${var.compartment_id} where all {request.principal.type = 'mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+#       "Allow any-user to associate keys in compartment ${var.compartment_id} with volumes in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+#       "Allow any-user to associate keys in compartment ${var.compartment_id} with volume-backups in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+#       "Allow any-user to associate keys in compartment ${var.compartment_id} with buckets in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+#     ]
+#     netpol = [
+#       "Allow any-user to {NETWORK_SECURITY_GROUP_UPDATE_MEMBERS} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+#       "Allow any-user to {VNIC_CREATE, VNIC_UPDATE, VNIC_ASSOCIATE_NETWORK_SECURITY_GROUP, VNIC_DISASSOCIATE_NETWORK_SECURITY_GROUP} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+#       "Allow any-user to {SECURITY_ATTRIBUTE_NAMESPACE_USE, VNIC_UPDATE, VNIC_CREATE} in compartment ${var.compartment_id} where all {request.principal.type='mysqldbsystem', request.resource.compartment.id='${var.compartment_id}'}",
+#     ]
+#     computepol = [
+#       "Allow any-user to {VOLUME_UPDATE, VOLUME_INSPECT, VOLUME_CREATE, VOLUME_BACKUP_READ, VOLUME_BACKUP_UPDATE, BUCKET_UPDATE, VOLUME_GROUP_BACKUP_CREATE, VOLUME_BACKUP_COPY, VOLUME_BACKUP_CREATE, TAG_NAMESPACE_INSPECT, TAG_NAMESPACE_USE} in compartment ${var.compartment_id} where request.principal.type = 'mysqldbsystem'",
+#     ]
+#   }
+# }
 
 
-resource "oci_identity_policy" "policies" {
-  for_each       = var.policies != null ? var.policies : {}
-  compartment_id = var.compartment_id
-  description    = each.value
-  name           = join("-", [var.environment, each.key])
+# resource "oci_identity_policy" "policies" {
+#   for_each       = var.policies != null ? var.policies : {}
+#   compartment_id = var.compartment_id
+#   description    = each.value
+#   name           = join("-", [var.environment, each.key])
 
-  statements = local.policies[each.key]
+#   statements = local.policies[each.key]
 
-  defined_tags  = var.tags.definedTags
-  freeform_tags = var.tags.freeformTags
+#   defined_tags  = var.tags.definedTags
+#   freeform_tags = var.tags.freeformTags
 
-  lifecycle {
-    ignore_changes = [defined_tags, freeform_tags]
-  }
-}
+#   lifecycle {
+#     ignore_changes = [defined_tags, freeform_tags]
+#   }
+# }
 
 resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   compartment_id      = var.compartment_id
@@ -59,7 +59,7 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
   port_x              = var.port_x
   ip_address          = var.ip_address
   # hostname_label      = join("-", [var.environment, var.hostname_label])
-  hostname_label      = join("-", [var.environment, var.display_name])
+  hostname_label = join("-", [var.environment, var.display_name])
 
   dynamic "encrypt_data" {
     for_each = var.key_generation_type != null ? [1] : []
@@ -154,5 +154,5 @@ resource "oci_mysql_mysql_db_system" "mysql_db_system" {
     ignore_changes = [defined_tags, freeform_tags]
   }
 
-  depends_on = [oci_identity_policy.policies]
+  # depends_on = [oci_identity_policy.policies]
 }

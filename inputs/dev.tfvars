@@ -24,43 +24,7 @@ oke = {
   cni_type                 = "FLANNEL_OVERLAY"
   services_cidr            = "10.96.0.0/16"
   pods_cidr                = "10.244.0.0/16"
-
-  log_group = {
-    name = "oke-loggroup"
-  }
-
-  instance_dynamic_group = {
-    name        = "nodes-dg"
-    description = "Nodepool dyanmic group"
-  }
-
-  policy = {
-    name = "oke-policy"
-  }
-  unified_agent_configuration = {
-    name               = "nodes-uac"
-    is_enabled         = true
-    configuration_type = "LOGGING"
-    log_object_name    = "customlog-oke"
-    source = {
-      name        = "worker-logtail"
-      source_type = "LOG_TAIL"
-      paths       = ["/var/log/containers/*", "/var/log/pods/*"]
-      parser_type = "NONE"
-    }
-  }
-
-  logs = {
-    "servicelog-oke" = {
-      type        = "SERVICE"
-      source_type = "OCISERVICE"
-      service     = "oke-k8s-cp-prod"
-      category    = "all-service-logs"
-    }
-    "customlog-oke" = {
-      type = "CUSTOM"
-    }
-  }
+  kms_key_name                 = "encryption-key"
 
   node_pools = {
     "pool" = {
@@ -70,7 +34,8 @@ oke = {
       node_pool_size                      = 1
       cni_type                            = "FLANNEL_OVERLAY"
       node_nsg_names                      = ["nsg-oke-workernode"]
-      is_pv_encryption_in_transit_enabled = false
+      is_pv_encryption_in_transit_enabled = true
+      # key_name                            = "encryption-key"
     }
   }
 
@@ -89,4 +54,5 @@ mysql = {
   display_name            = "mysql"
   data_storage_size_in_gb = 50
   is_highly_available     = false
+  key_name                = "encryption-key"
 }
