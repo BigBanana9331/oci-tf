@@ -9,3 +9,7 @@ output "subnets" {
 output "nsgs" {
   value = local.nsgs
 }
+
+output "options" {
+  value = data.oci_containerengine_node_pool_option.node_pool_option
+}

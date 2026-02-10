@@ -133,7 +133,7 @@ variable "key_generation_type" {
   default = "BOYK" # BYOK/SYSTEM
 }
 
-variable "key_id" {
+variable "kms_key_id" {
   type     = string
   nullable = true
   default  = null
