@@ -24,7 +24,7 @@ oke = {
   cni_type                 = "FLANNEL_OVERLAY"
   services_cidr            = "10.96.0.0/16"
   pods_cidr                = "10.244.0.0/16"
-  kms_key_name                 = "encryption-key"
+  kms_key_name             = "encryption-key"
 
   node_pools = {
     "pool" = {

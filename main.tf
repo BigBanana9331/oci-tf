@@ -30,7 +30,7 @@ module "oke" {
   kubernetes_version      = var.oke.kubernetes_version
   vcn_id                  = data.oci_core_vcns.vcns.virtual_networks[0].id
   cluster_subnet_id       = var.oke.cluster_subnet_name
-  loadbalancer_subnet_ids = [for subnet in var.oke.loadbalancer_subnet_ids : lookup(local.subnets, subnet)]
+  loadbalancer_subnet_ids = [for subnet in var.oke.loadbalancer_subnet_names : lookup(local.subnets, subnet)]
   worker_subnet_id        = var.oke.worker_subnet_name
   endpoint_nsg_ids        = var.oke.endpoint_nsg_names
   cni_type                = var.oke.cni_type
@@ -48,7 +48,7 @@ module "mysql" {
   compartment_id          = var.compartment_ocid
   environment             = var.environment
   tags                    = local.tags
-  subnet_id               = local.subnets[var.mysql.subnet_name]
+  subnet_id               = local.subnets[var.mysql.subnet_name].id
   nsg_ids                 = [for nsg in var.mysql.nsg_names : lookup(nsg, local.nsgs)]
   availability_domain     = data.oci_identity_availability_domain.ad.id
   shape_name              = var.mysql.shape_name
@@ -56,5 +56,5 @@ module "mysql" {
   data_storage_size_in_gb = var.mysql.data_storage_size_in_gb
   is_highly_available     = var.mysql.is_highly_available
   admin_password          = base64decode(data.oci_secrets_secretbundle.admin_password_secretbundle.secret_bundle_content[0].content)
-  key_id                  = data.oci_kms_keys.keys[var.mysql.key_name]
+  key_id                  = local.keys[var.mysql.kms_key_name].id
 }

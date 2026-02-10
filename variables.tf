@@ -92,16 +92,16 @@ variable "oke" {
   nullable = true
   default  = null
   type = object({
-    cluster_name            = string
-    cluster_type            = string
-    kubernetes_version      = string
-    cluster_subnet_name     = string
-    endpoint_nsg_names      = set(string)
-    cni_type                = string
-    loadbalancer_subnet_ids = list(string)
-    worker_subnet_name      = string
-    services_cidr           = string
-    pods_cidr               = string
+    cluster_name              = string
+    cluster_type              = string
+    kubernetes_version        = string
+    cluster_subnet_name       = string
+    endpoint_nsg_names        = set(string)
+    cni_type                  = string
+    loadbalancer_subnet_names = list(string)
+    worker_subnet_name        = string
+    services_cidr             = string
+    pods_cidr                 = string
     kms_key_name              = string
     node_pools = map(object({
       node_shape                           = string
@@ -143,6 +143,6 @@ variable "mysql" {
     display_name            = string
     data_storage_size_in_gb = number
     is_highly_available     = bool
-    key_name                = string
+    kms_key_name            = string
   })
 }
