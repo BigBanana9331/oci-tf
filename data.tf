@@ -41,7 +41,7 @@ data "oci_kms_keys" "keys" {
 data "oci_vault_secrets" "admin_password_secret" {
   compartment_id = var.vault_compartment_id
   name           = var.admin_password_secret_name
-  vault_id       = data.oci_kms_vaults.vaults.vaults[0].management_endpoint
+  vault_id       = data.oci_kms_vaults.vaults.vaults[0].id
 }
 
 data "oci_secrets_secretbundle" "admin_password_secretbundle" {
