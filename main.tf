@@ -30,7 +30,7 @@ module "oke" {
   kubernetes_version      = element(data.oci_containerengine_node_pool_option.node_pool_option.kubernetes_versions, -1)
   image_id                = local.image_id
   vcn_id                  = data.oci_core_vcns.vcns.virtual_networks[0].id
-  availability_domain     = data.oci_identity_availability_domain.ad.id
+  availability_domain     = data.oci_identity_availability_domain.ad.name
   cluster_subnet_id       = var.oke.cluster_subnet_name
   endpoint_nsg_ids        = var.oke.endpoint_nsg_names
   loadbalancer_subnet_ids = [for subnet in var.oke.loadbalancer_subnet_names : lookup(local.subnets, join("-", [var.environment, subnet]))]
@@ -38,7 +38,7 @@ module "oke" {
   cni_type                = var.oke.cni_type
   services_cidr           = var.oke.services_cidr
   pods_cidr               = var.oke.pods_cidr
-  kms_key_id              = local.keys[var.oke.kms_key_name]
+  # kms_key_id              = local.keys[var.oke.kms_key_name]
   node_pools              = var.oke.node_pools
   dynamic_group_ids       = [data.oci_identity_dynamic_groups.dynamic_groups.dynamic_groups[0].id]
   autoscaler              = var.oke.autoscaler
@@ -53,7 +53,7 @@ module "mysql" {
   tags                    = local.tags
   subnet_id               = local.subnets[join("-", [var.environment, var.mysql.subnet_name])]
   nsg_ids                 = [for nsg in var.mysql.nsg_names : lookup(local.nsgs, join("-", [var.environment, nsg]))]
-  availability_domain     = data.oci_identity_availability_domain.ad.id
+  availability_domain     = data.oci_identity_availability_domain.ad.name
   shape_name              = var.mysql.shape_name
   display_name            = var.mysql.display_name
   data_storage_size_in_gb = var.mysql.data_storage_size_in_gb
