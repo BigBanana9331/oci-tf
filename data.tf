@@ -32,6 +32,11 @@ data "oci_kms_vaults" "vaults" {
   }
 }
 
+data "oci_identity_dynamic_groups" "dynamic_groups" {
+  compartment_id = var.tenancy_ocid
+  name           = join("-", [var.environment, var.dynamic_group_name]) #dev-nodes-dg
+}
+
 data "oci_kms_keys" "keys" {
   compartment_id      = var.vault_compartment_id
   management_endpoint = data.oci_kms_vaults.vaults.vaults[0].management_endpoint

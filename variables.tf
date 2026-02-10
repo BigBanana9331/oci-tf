@@ -11,6 +11,11 @@ variable "ad_number" {
   default = 1
 }
 
+variable "dynamic_group_name" {
+  type    = string
+  default = ""
+}
+
 variable "compartment_ocid" {
   type = string
 }

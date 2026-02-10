@@ -150,6 +150,10 @@ variable "instance_dynamic_group" {
 #   }
 # }
 
+variable "dynamic_group_ids" {
+  type = list(string)
+}
+
 variable "unified_agent_configuration" {
   type = object({
     description        = optional(string, "Custom log confguration")
@@ -206,9 +210,6 @@ variable "logs" {
 variable "policies" {
   type = map(string)
   default = {
-    # "netpol"     = "Networking policy for OKE"
-    # "secpol"     = "Security policy for OKE"
-    # "computepol" = "Compute policy for OKE"
     logpol = "Policy for instances node group logging"
   }
 }

@@ -215,7 +215,7 @@ variable "deletion_policy" {
     is_delete_protected        = optional(bool)
   })
   default = {
-    automatic_backup_retention = "DELETED"
+    automatic_backup_retention = "DELETE"
     final_backup               = "SKIP_FINAL_BACKUP"
     is_delete_protected        = "false"
   }

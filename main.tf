@@ -15,7 +15,7 @@ module "apigw" {
   compartment_id = var.compartment_ocid
   environment    = var.environment
   tags           = local.tags
-  subnet_id      = var.apigw.subnet_name
+  subnet_id      = local.subnets[join("-", [var.environment, var.apigw.subnet_name])]
   nsg_ids        = [for nsg in var.apigw.nsg_names : lookup(local.nsgs, join("-", [var.environment, nsg]))]
 }
 
@@ -40,6 +40,7 @@ module "oke" {
   pods_cidr               = var.oke.pods_cidr
   kms_key_id              = local.keys[var.oke.kms_key_name]
   node_pools              = var.oke.node_pools
+  dynamic_group_ids       = [data.oci_identity_dynamic_groups.dynamic_groups.id]
   autoscaler              = var.oke.autoscaler
 }
 
