@@ -22,7 +22,7 @@ jobs:
       TF_VAR_environment: ${{ github.event.inputs.environment }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_compartment_ocid: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
-      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vcn_compartment_id: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
       TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
@@ -81,7 +81,7 @@ jobs:
       TF_VAR_environment: ${{ github.event.inputs.environment }}
       TF_VAR_tenancy_ocid: ${{ vars.OCI_TENANCY_OCID }}
       TF_VAR_compartment_ocid: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
-      TF_VAR_vcn_compartment_id: ${{ vars.TF_VAR_COMPARTMENT_OCID_UAT }}
+      TF_VAR_vcn_compartment_id: ${{ vars[format('TF_VAR_COMPARTMENT_OCID_{0}', github.event.inputs.environment)] }}
       TF_VAR_vault_compartment_id: ${{ vars.TF_VAR_VAULT_COMPARTMENT_OCID }}
       TF_VAR_region: ${{ vars.OCI_REGION }}
       TF_VAR_config_file_profile: ${{ vars.TF_VAR_CONFIG_FILE_PROFILE }}
